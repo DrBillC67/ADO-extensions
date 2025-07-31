@@ -190,7 +190,7 @@ export class RuleGroupList extends BaseFluxComponent<IRuleGroupListProps, IRuleG
                 name: "New Rule Group",
                 disabled: this.state.loading,
                 important: true,
-                iconProps: { iconName: "Add", iconType: VssIconType.fabric },
+                iconProps: { iconName: "Add", iconType: VssIconType.Fabric },
                 onClick: () => {
                     this._showGroupPanel();
                 }
@@ -200,7 +200,7 @@ export class RuleGroupList extends BaseFluxComponent<IRuleGroupListProps, IRuleG
                 name: "Refresh",
                 disabled: this.state.loading,
                 important: true,
-                iconProps: { iconName: "Refresh", iconType: VssIconType.fabric },
+                iconProps: { iconName: "Refresh", iconType: VssIconType.Fabric },
                 onClick: this._refresh
             },
             {
@@ -208,7 +208,7 @@ export class RuleGroupList extends BaseFluxComponent<IRuleGroupListProps, IRuleG
                 name: "Settings",
                 disabled: this.state.loading,
                 important: true,
-                iconProps: { iconName: "Settings", iconType: VssIconType.fabric },
+                iconProps: { iconName: "Settings", iconType: VssIconType.Fabric },
                 onClick: this._showSettingsPanel
             }
         ];
@@ -281,7 +281,7 @@ export class RuleGroupList extends BaseFluxComponent<IRuleGroupListProps, IRuleG
                             directionalHint={DirectionalHint.bottomCenter}
                         >
                             <VssIcon
-                                iconType={VssIconType.fabric}
+                                iconType={VssIconType.Fabric}
                                 iconName={ruleGroup.disabled ? "CircleStopSolid" : "SkypeCheck"}
                                 className={css("rule-group-status", { disabled: ruleGroup.disabled })}
                             />
@@ -408,17 +408,18 @@ export class RuleGroupList extends BaseFluxComponent<IRuleGroupListProps, IRuleG
                 </div>
                 <div className={css("subscribe-button", { unsubscribed: !isSubscribed })}>
                     <TooltipHost content={iconTooltip} delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomAutoEdge}>
-                        {isPersonalOrGlobalRuleGroup(ruleGroup) && <VssIcon iconType={VssIconType.fabric} iconName="Info" className="rule-group-info-icon" />}
+                        {isPersonalOrGlobalRuleGroup(ruleGroup) && <VssIcon iconType={VssIconType.Fabric} iconName="Info" className="rule-group-info-icon" />}
                         {!isPersonalOrGlobalRuleGroup(ruleGroup) && (
                             <IconToggleButton
+                                iconName="FavoriteStar"
                                 toggledOnIconProps={{
                                     iconName: "FavoriteStarFill",
-                                    iconType: VssIconType.fabric,
+                                    iconType: VssIconType.Fabric,
                                     style: { color: "#ffbe00", fontSize: "14px" }
                                 }}
                                 toggledOffIconProps={{
                                     iconName: "FavoriteStar",
-                                    iconType: VssIconType.fabric,
+                                    iconType: VssIconType.Fabric,
                                     style: { fontSize: "14px" }
                                 }}
                                 isToggledOn={isSubscribed}

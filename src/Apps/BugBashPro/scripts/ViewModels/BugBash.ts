@@ -61,7 +61,7 @@ export class BugBash {
     }
 
     private _originalModel: IBugBash;
-    private _updates: IBugBash;
+    private _updates: { [key: string]: any };
 
     public get id(): string {
         return this._originalModel.id;
@@ -82,7 +82,7 @@ export class BugBash {
     constructor(model?: IBugBash) {
         const bugBashModel = model || BugBash.getNewBugBashModel();
         this._originalModel = { ...bugBashModel };
-        this._updates = {} as IBugBash;
+        this._updates = {};
     }
 
     public setFieldValue<T extends string | boolean | Date | number>(fieldName: BugBashFieldNames, fieldValue: T, fireChange: boolean = true) {
@@ -123,7 +123,7 @@ export class BugBash {
     }
 
     public reset(fireChange: boolean = true) {
-        this._updates = {} as IBugBash;
+        this._updates = {};
         if (fireChange) {
             BugBashActions.fireStoreChange();
         }

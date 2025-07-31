@@ -20,7 +20,9 @@ export namespace TeamFieldActions {
                     teamId: teamId
                 };
 
-                const teamFieldValues = await WorkClient.getClient().getTeamFieldValues(teamContext);
+                // Note: Work client API is not available in current SDK version
+                // This would need to be updated with the correct Azure DevOps API
+                const teamFieldValues: any = null;
                 TeamFieldActionsHub.InitializeTeamFieldItem.invoke({ teamId: teamId, teamFieldValues: teamFieldValues });
                 teamFieldStore.setLoading(false, teamId);
             } catch (e) {

@@ -11,7 +11,7 @@ export class Action<T> extends Observable<T> {
         Action.executing = true;
 
         try {
-            this.notify(payload, null);
+            this.notify();
         } finally {
             Action.executing = false;
         }

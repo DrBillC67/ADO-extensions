@@ -1,3 +1,39 @@
+// CSS Variable overrides to fix VSS UI compatibility issues
+:root {
+  --palette-neutral-100: 0, 0, 0;
+  --palette-neutral-4: 244, 244, 244;
+  --palette-neutral-8: 234, 234, 234;
+  --palette-neutral-20: 200, 200, 200;
+  --palette-primary-shade-30: 0, 69, 120;
+  --communication-foreground: 0, 120, 212;
+  --text-primary-color: 0, 0, 0, 0.9;
+}
+
+// Fix for VSS UI CSS color variables
+$palette-neutral-100: 0, 0, 0;
+$palette-neutral-4: 244, 244, 244;
+$palette-neutral-8: 234, 234, 234;
+$palette-neutral-20: 200, 200, 200;
+$palette-primary-shade-30: 0, 69, 120;
+$communication-foreground: 0, 120, 212;
+$text-primary-color: 0, 0, 0, 0.9;
+
+// Additional color variables for VSS UI compatibility
+$_palette-neutral-100: 0, 0, 0;
+$_palette-neutral-4: 244, 244, 244;
+$_palette-neutral-8: 234, 234, 234;
+$_palette-neutral-20: 200, 200, 200;
+$_palette-primary-shade-30: 0, 69, 120;
+$_communication-foreground: 0, 120, 212;
+$_text-primary-color: 0, 0, 0, 0.9;
+
+// Override VSS UI CSS variables that are causing build failures
+:global {
+  .vss-breadcrumb {
+    color: rgba(0, 0, 0, 0.33) !important;
+  }
+}
+
 @mixin TextOverflowEllipsis() {
     overflow: hidden;
     text-overflow: ellipsis;

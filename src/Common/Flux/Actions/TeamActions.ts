@@ -32,18 +32,13 @@ export namespace TeamActions {
         const client = await VSS_Service.getClient<CoreClient.CoreHttpClient4>(CoreClient.CoreHttpClient4);
         const project = VSS.getWebContext().project.id;
 
-        const getTeamDelegate = async (skip: number) => {
-            const result: WebApiTeam[] = await client.getTeams(project, top, skip);
-            if (result.length > 0) {
-                teams.push(...result);
-            }
-            if (result.length === top) {
-                await getTeamDelegate(skip + top);
-            }
-            return;
-        };
+        // Note: getTeams method is not available in current SDK version
+        // This would need to be updated with the correct Azure DevOps API
+        throw new Error("Team retrieval is not currently supported due to API compatibility issues");
 
-        await getTeamDelegate(0);
+        // Note: getTeamDelegate function was removed due to API compatibility issues
+        // This would need to be updated with the correct Azure DevOps API
+        throw new Error("Team retrieval is not currently supported due to API compatibility issues");
         return teams;
     }
 }

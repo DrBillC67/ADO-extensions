@@ -11,7 +11,7 @@ import { IconButton } from "OfficeFabric/Button";
 import { FocusZone, FocusZoneDirection } from "OfficeFabric/FocusZone";
 import { DirectionalHint, TooltipDelay, TooltipHost } from "OfficeFabric/Tooltip";
 import { css } from "OfficeFabric/Utilities";
-import Editor from "roosterjs-editor-core/lib/editor/Editor";
+import { Editor } from "roosterjs-editor-core";
 
 export interface IRichEditorToolbarProps {
     buttons: RichEditorToolbarButtonNames[];

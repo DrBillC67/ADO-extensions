@@ -17,7 +17,7 @@ import {
 } from "Common/Utilities/String";
 import { getWorkItemUrl } from "Common/Utilities/UrlHelper";
 import { openWorkItemDialog } from "Common/Utilities/WorkItemFormHelpers";
-import * as format from "date-fns/format";
+import { format } from "date-fns";
 import {
     DirectionalHint, TooltipDelay, TooltipHost, TooltipOverflowMode
 } from "OfficeFabric/Tooltip";
@@ -446,12 +446,10 @@ export class BugBashItem {
                 <TooltipHost content={tooltip} delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomCenter}>
                     <VssIcon
                         iconName={iconName}
-                        iconType={VssIconType.fabric}
-                        styles={{
-                            root: {
-                                color: color,
-                                cursor: "default"
-                            }
+                        iconType={VssIconType.Fabric}
+                        style={{
+                            color: color,
+                            cursor: "default"
                         }}
                     />
                 </TooltipHost>

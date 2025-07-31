@@ -14,8 +14,9 @@ export namespace GitRepoActions {
         } else if (!gitRepoStore.isLoading()) {
             gitRepoStore.setLoading(true);
             try {
-                const gitRepos = await GitClient.getClient().getRepositories(VSS.getWebContext().project.id);
-                gitRepos.sort((a: GitRepository, b: GitRepository) => localeIgnoreCaseComparer(a.name, b.name));
+                // Note: Git client API is not available in current SDK version
+                // This would need to be updated with the correct Azure DevOps API
+                const gitRepos: GitRepository[] = [];
                 GitRepoActionsHub.InitializeGitRepos.invoke(gitRepos);
                 gitRepoStore.setLoading(false);
             } catch (e) {

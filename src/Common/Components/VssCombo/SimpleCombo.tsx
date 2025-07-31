@@ -75,7 +75,7 @@ export class SimpleCombo<T> extends BaseFluxComponent<ISimpleComboProps<T>, ISim
             change: this._onChange
         } as IComboOptions;
 
-        this._control = Control.create(Combo, $(this._container), comboOptions);
+        this._control = new Combo($(this._container), comboOptions);
     }
 
     public componentWillUnmount(): void {

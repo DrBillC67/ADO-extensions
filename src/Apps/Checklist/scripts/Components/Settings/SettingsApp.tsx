@@ -118,12 +118,12 @@ export class SettingsApp extends BaseFluxComponent<IBaseFluxComponentProps, IApp
 
     private async _attachNavigate() {
         this._navigationService = await getHostNavigationService();
-        this._navigationService.attachNavigate(null, this._onNavigate, true);
+        this._navigationService.attachNavigate(this._onNavigate);
     }
 
     private _detachNavigate() {
         if (this._navigationService) {
-            this._navigationService.detachNavigate(null, this._onNavigate);
+            this._navigationService.detachNavigate(this._onNavigate);
         }
     }
 

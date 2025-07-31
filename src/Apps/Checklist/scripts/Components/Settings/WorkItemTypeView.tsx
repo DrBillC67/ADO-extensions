@@ -23,7 +23,7 @@ import { IPivotBarAction, PivotBarItem } from "VSSUI/Components/PivotBar";
 import { HubViewState, IHubViewState } from "VSSUI/Utilities/HubViewState";
 import { VssIcon, VssIconType } from "VSSUI/VssIcon";
 
-const DragHandle: any = SortableHandle(() => <VssIcon className="drag-handle" iconName="GlobalNavButton" iconType={VssIconType.fabric} />);
+const DragHandle: any = SortableHandle(() => <VssIcon className="drag-handle" iconName="GlobalNavButton" iconType={VssIconType.Fabric} />);
 
 const SortableItem: any = SortableElement(({ value }) => {
     return (
@@ -124,7 +124,7 @@ export class WorkItemTypeView extends BaseFluxComponent<IWorkItemTypeViewProps, 
                 name: "Refresh",
                 disabled: this.state.checklist == null,
                 important: true,
-                iconProps: { iconName: "Refresh", iconType: VssIconType.fabric },
+                iconProps: { iconName: "Refresh", iconType: VssIconType.Fabric },
                 onClick: () => this._refresh()
             }
         ];

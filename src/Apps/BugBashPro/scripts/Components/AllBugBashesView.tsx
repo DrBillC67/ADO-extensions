@@ -24,7 +24,7 @@ import {
 } from "Common/Utilities/LocalSettingsService";
 import { navigate } from "Common/Utilities/Navigation";
 import { stringEquals } from "Common/Utilities/String";
-import * as format from "date-fns/format";
+import { format } from "date-fns";
 import { IContextualMenuItem } from "OfficeFabric/ContextualMenu";
 import { ConstrainMode, DetailsListLayoutMode, IColumn } from "OfficeFabric/DetailsList";
 import { Link } from "OfficeFabric/Link";
@@ -95,6 +95,7 @@ export class AllBugBashesView extends BaseFluxComponent<IBaseFluxComponentProps,
                 )}
                 <Hub
                     className="bugbashes-hub"
+                    title="Bug Bashes"
                     hideFullScreenToggle={true}
                     hubViewState={this._hubViewState}
                     commands={[
@@ -102,21 +103,21 @@ export class AllBugBashesView extends BaseFluxComponent<IBaseFluxComponentProps,
                             key: "new",
                             name: "New Bug Bash",
                             important: true,
-                            iconProps: { iconName: "Add", iconType: VssIconType.fabric },
+                            iconProps: { iconName: "Add", iconType: VssIconType.Fabric },
                             onClick: () => navigate({ view: UrlActions.ACTION_EDIT })
                         },
                         {
                             key: "refresh",
                             name: "Refresh",
                             important: true,
-                            iconProps: { iconName: "Refresh", iconType: VssIconType.fabric },
+                            iconProps: { iconName: "Refresh", iconType: VssIconType.Fabric },
                             onClick: () => BugBashActions.refreshAllBugBashes()
                         },
                         {
                             key: "settings",
                             name: "Settings",
                             important: true,
-                            iconProps: { iconName: "Settings", iconType: VssIconType.fabric },
+                            iconProps: { iconName: "Settings", iconType: VssIconType.Fabric },
                             onClick: () => this.setState({ settingsPanelOpen: !this.state.settingsPanelOpen } as IAllBugBashesViewState)
                         }
                     ]}
@@ -133,7 +134,7 @@ export class AllBugBashesView extends BaseFluxComponent<IBaseFluxComponentProps,
                         />
                     </HubTileRegion>
                     <FilterBar componentRef={this._resolveFilterBar}>
-                        <KeywordFilterBarItem filterItemKey={BugBashFieldNames.Title} />
+                        <KeywordFilterBarItem filterItemKey={BugBashFieldNames.Title} value="" onChanged={() => {}} />
                     </FilterBar>
                     <PivotBarItem name={"Ongoing"} itemKey={DirectoryPagePivotKeys.Ongoing} badgeCount={this.state.ongoingBugBashes ? this.state.ongoingBugBashes.length : null}>
                         {this._getContents(DirectoryPagePivotKeys.Ongoing)}

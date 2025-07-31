@@ -33,7 +33,7 @@ export class FieldChangedTrigger extends BaseTrigger {
         const newFieldValue: string = await translateToFieldValue(this.getAttribute<string>("newFieldValue", true) || "", field.type);
 
         if (args && args.changedFields && args.changedFields[fieldName]) {
-            const oldValue = await formService.getFieldValue(fieldName, true);
+            const oldValue = await formService.getFieldValue(fieldName);
             const newValue = await formService.getFieldValue(fieldName);
 
             return oldValue !== newValue && (isAnyMacro(oldFieldValue) || oldFieldValue === oldValue) && (isAnyMacro(newFieldValue) || newFieldValue === newValue);

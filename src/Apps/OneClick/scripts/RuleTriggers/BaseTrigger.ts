@@ -86,7 +86,7 @@ export abstract class BaseTrigger extends Observable<void> {
     public abstract getAssociatedFormEvent(): FormEvents;
     public abstract getFriendlyName(): string;
     public abstract getDescription(): string;
-    public abstract async shouldTrigger(args: any): Promise<boolean>;
+    public abstract shouldTrigger(args: any): Promise<boolean>;
     public abstract render(workItemType: string): React.ReactNode;
     public abstract isValid(): boolean;
 
@@ -95,6 +95,6 @@ export abstract class BaseTrigger extends Observable<void> {
     }
 
     private _emitChanged() {
-        this.notify(null, null);
+        this.notify();
     }
 }

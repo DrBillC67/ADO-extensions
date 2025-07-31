@@ -9,7 +9,7 @@ import {
     IWorkItemFieldControlProps, IWorkItemFieldControlState, WorkItemFieldControl
 } from "Common/Components/VSTS/WorkItemFieldControl";
 import { getFormService } from "Common/Utilities/WorkItemFormHelpers";
-import * as format from "date-fns/format";
+import { format } from "date-fns";
 import { IconButton } from "OfficeFabric/Button";
 import { Fabric } from "OfficeFabric/Fabric";
 import { css } from "OfficeFabric/Utilities";

@@ -50,7 +50,7 @@ export class ChecklistItemEditor extends BaseFluxComponent<IChecklistItemEditorP
                     placeholder={inputPlaceholder}
                     readOnly={disabled}
                     value={checklistItem.text}
-                    onChanged={this._onItemTextChange}
+                    onChange={this._onItemTextChange}
                     maxLength={128}
                     onKeyUp={this._onInputKeyUp}
                 />
@@ -157,7 +157,8 @@ export class ChecklistItemEditor extends BaseFluxComponent<IChecklistItemEditorP
         }
     };
 
-    private _onItemTextChange = (value: string) => {
+    private _onItemTextChange = (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
+        const value = newValue || (event.target as HTMLInputElement).value;
         const checklistItem = { ...this.state.checklistItem };
         checklistItem.text = value;
         this.setState({ checklistItem: checklistItem });

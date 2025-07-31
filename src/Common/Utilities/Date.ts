@@ -1,9 +1,7 @@
-import * as format from "date-fns/format";
-import * as isValid from "date-fns/is_valid";
-import * as parse from "date-fns/parse";
+import { format, isValid, parse } from "date-fns";
 
 export function isDate(value: string): boolean {
-    return isValid(parse(value));
+    return isValid(parse(value, "yyyy-MM-dd", new Date()));
 }
 
 export function defaultDateComparer(date1: Date, date2: Date): number {

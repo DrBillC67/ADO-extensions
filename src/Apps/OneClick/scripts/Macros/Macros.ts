@@ -2,8 +2,8 @@ import { getCurrentUserName } from "Common/Utilities/Identity";
 import { isInteger } from "Common/Utilities/Number";
 import { startsWith, toString } from "Common/Utilities/String";
 import { getFormService, getWorkItemField } from "Common/Utilities/WorkItemFormHelpers";
-import * as addDays from "date-fns/add_days";
-import * as format from "date-fns/format";
+import { addDays } from "date-fns";
+import { format } from "date-fns";
 
 export abstract class BaseMacro {
     private static registeredMacros: IDictionaryStringTo<new () => BaseMacro> = {};
@@ -40,7 +40,7 @@ export abstract class BaseMacro {
         return startsWith(str, "@");
     }
 
-    public abstract async translate(macroStr: string, typed?: boolean): Promise<string | any>;
+    public abstract translate(macroStr: string, typed?: boolean): Promise<string | any>;
     public abstract getName(): string;
 }
 
@@ -79,7 +79,7 @@ export class MacroToday extends BaseMacro {
         if (typed) {
             return returnValue;
         } else {
-            return format(returnValue);
+            return format(new Date(returnValue), "yyyy-MM-dd");
         }
     }
 

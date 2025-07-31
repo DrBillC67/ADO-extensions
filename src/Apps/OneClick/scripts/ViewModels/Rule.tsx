@@ -28,14 +28,14 @@ export class Rule extends Observable<void> {
     }
 
     private _originalModel: IRule;
-    private _updates: IRule;
+    private _updates: { [key: string]: any };
     private _actions: BaseAction[];
     private _triggers: BaseTrigger[];
 
     constructor(model: IRule) {
         super();
         this._originalModel = { ...model };
-        this._updates = {} as IRule;
+        this._updates = {};
 
         this._actions = this._prepareActions(this._originalModel.actions || []);
         this._triggers = this._prepareTriggers(this._originalModel.triggers || []);
@@ -127,7 +127,7 @@ export class Rule extends Observable<void> {
 
     public dispose() {
         this._originalModel = null;
-        this._updates = null;
+        this._updates = {};
         for (const action of this._actions) {
             action.removeChangedListener(this._emitChanged);
             action.dispose();
@@ -286,6 +286,6 @@ export class Rule extends Observable<void> {
     };
 
     private _emitChanged = () => {
-        this.notify(null, null);
+        this.notify();
     };
 }

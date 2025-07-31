@@ -104,13 +104,13 @@ export class ClassificationPicker extends BaseFluxComponent<IClassificationPicke
         // tslint:disable-next-line:no-parameter-reassignment
         level = level || 1;
         if (uiNode) {
-            newUINode = TreeNode.create(nodeName);
+            newUINode = this._createTreeNode(nodeName);
             uiNode.add(newUINode);
             // tslint:disable-next-line:no-parameter-reassignment
             uiNode = newUINode;
         } else {
             // tslint:disable-next-line:no-parameter-reassignment
-            uiNode = TreeNode.create(nodeName);
+            uiNode = this._createTreeNode(nodeName);
         }
         uiNode.expanded = level < 2;
         if (nodes) {
@@ -119,6 +119,22 @@ export class ClassificationPicker extends BaseFluxComponent<IClassificationPicke
             }
         }
         return uiNode;
+    }
+
+    private _createTreeNode(name: string): TreeNode {
+        const node: TreeNode = {
+            id: name,
+            name: name,
+            children: [],
+            add: (child: TreeNode) => {
+                if (!node.children) {
+                    node.children = [];
+                }
+                node.children.push(child);
+            },
+            expanded: false
+        };
+        return node;
     }
 
     private _getDefaultError(): string {

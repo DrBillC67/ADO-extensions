@@ -1,4 +1,4 @@
-import * as format from "date-fns/format";
+import { format } from "date-fns";
 
 function convertToString(value: any, upperCase: boolean, useLocale: boolean): string {
     let result: string;
@@ -116,7 +116,7 @@ export function toString(val: any): string {
     } else if (typeof val === "number") {
         return `${val}`;
     } else if (val instanceof Date) {
-        format(val);
+        return format(val, "M/D/YYYY");
     } else {
         return val;
     }

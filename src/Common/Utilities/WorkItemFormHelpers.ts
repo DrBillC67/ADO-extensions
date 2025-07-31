@@ -11,7 +11,7 @@ let workItemFormNavigationService: IWorkItemFormNavigationService;
 
 export async function getFormService(): Promise<IWorkItemFormService> {
     if (!workItemFormService) {
-        workItemFormService = await WorkItemFormService.getService();
+        workItemFormService = await VSS.getService<IWorkItemFormService>(VSS.ServiceIds.WorkItemForm);
     }
 
     return workItemFormService;
@@ -19,7 +19,7 @@ export async function getFormService(): Promise<IWorkItemFormService> {
 
 export async function getFormNavigationService(): Promise<IWorkItemFormNavigationService> {
     if (!workItemFormNavigationService) {
-        workItemFormNavigationService = await WorkItemFormNavigationService.getService();
+        workItemFormNavigationService = await VSS.getService<IWorkItemFormNavigationService>(VSS.ServiceIds.WorkItemFormNavigation);
     }
 
     return workItemFormNavigationService;
@@ -27,18 +27,18 @@ export async function getFormNavigationService(): Promise<IWorkItemFormNavigatio
 
 export async function openWorkItemDialog(e: React.MouseEvent<HTMLElement>, item: WorkItem): Promise<WorkItem> {
     const newTab = e ? e.ctrlKey : false;
-    const workItemNavSvc = await WorkItemFormNavigationService.getService();
+    const workItemNavSvc = await getFormNavigationService();
     return workItemNavSvc.openWorkItem(item.id, newTab);
 }
 
 export async function getWorkItemType(): Promise<string> {
     const formService = await getFormService();
-    return (await formService.getFieldValue("System.WorkItemType", true)) as string;
+    return (await formService.getFieldValue("System.WorkItemType")) as string;
 }
 
 export async function getWorkItemProject(): Promise<string> {
     const formService = await getFormService();
-    return (await formService.getFieldValue("System.TeamProject", true)) as string;
+    return (await formService.getFieldValue("System.TeamProject")) as string;
 }
 
 export async function getWorkItemField(fieldName: string): Promise<WorkItemField> {

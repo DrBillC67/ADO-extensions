@@ -70,7 +70,7 @@ export class TreeCombo extends BaseFluxComponent<ITreeComboProps, ITreeComboStat
             sepChar: "\\"
         } as IComboOptions;
 
-        this._control = Control.create(Combo, $(this._container), comboOptions);
+        this._control = new Combo($(this._container), comboOptions);
     }
 
     public componentWillUnmount(): void {

@@ -17,20 +17,20 @@ export namespace RulesDataService {
     }
 
     export async function loadRulesForGroups(ruleGroupIds: string[], projectId: string): Promise<IRule[]> {
-        const collections: ExtensionDataCollection[] = ruleGroupIds.map(
+        const collections: any[] = ruleGroupIds.map(
             ruleGroupId =>
                 ({
                     collectionName: getCollectionKey(ruleGroupId),
                     scopeType: isPrivateRuleGroup(ruleGroupId) ? "User" : "Default",
                     scopeValue: isPrivateRuleGroup(ruleGroupId) ? "Me" : "Current"
-                } as ExtensionDataCollection)
+                })
         );
 
         const loadedCollections = await ExtensionDataManager.queryCollections(collections);
         let rules: IRule[] = [];
         for (const coll of loadedCollections) {
-            if (coll && coll.documents && coll.documents.length > 0) {
-                rules.push(...(coll.documents as IRule[]));
+            if (coll && (coll as any).documents && (coll as any).documents.length > 0) {
+                rules.push(...((coll as any).documents as IRule[]));
             }
         }
 

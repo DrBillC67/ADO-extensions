@@ -155,10 +155,10 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
         }
 
         return (
-            <Hub className="bugbash-view-hub" hideFullScreenToggle={true} hubViewState={this._hubViewState}>
+            <Hub className="bugbash-view-hub" title="Bug Bash View" hideFullScreenToggle={true} hubViewState={this._hubViewState}>
                 <HubHeader
                     title={title}
-                    breadcrumbItems={[
+                    breadcrumbs={[
                         {
                             text: "Bug Bashes",
                             key: "bugbashes",
@@ -313,7 +313,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
         if ((this.state.selectedPivot === BugBashViewPivotKeys.Results || this.state.selectedPivot === BugBashViewPivotKeys.Charts) && !this.props.bugBashItemId) {
             return (
                 <FilterBar componentRef={this._resolveFilterBar}>
-                    <KeywordFilterBarItem filterItemKey={"keyword"} />
+                    <KeywordFilterBarItem filterItemKey={"keyword"} value="" onChanged={() => {}} />
                     {this.state.paneMode !== BugBashViewActions.AcceptedItemsOnly &&
                         this.state.paneMode !== BugBashViewActions.AllItems &&
                         this._getPickListFilterBarItem("Team", BugBashItemFieldNames.TeamId)}
@@ -339,7 +339,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                 key: HubKeys.BugBashViewOptionsKey,
                 name: HubKeys.BugBashViewOptionsKey,
                 actionType: PivotBarViewActionType.ChoiceGroup,
-                iconProps: { iconName: "Equalizer", iconType: VssIconType.fabric },
+                iconProps: { iconName: "Equalizer", iconType: VssIconType.Fabric },
                 important: true,
                 actionProps: {
                     options: [
@@ -376,7 +376,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                     key: "goback",
                     name: "Go back to list",
                     important: true,
-                    iconProps: { iconName: "RevToggleKey", iconType: VssIconType.fabric },
+                    iconProps: { iconName: "RevToggleKey", iconType: VssIconType.Fabric },
                     disabled: this.state.bugBash.isNew(),
                     onClick: this._goBackToBugBashResults
                 }
@@ -387,7 +387,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                     key: "refresh",
                     name: "Refresh",
                     important: true,
-                    iconProps: { iconName: "Refresh", iconType: VssIconType.fabric },
+                    iconProps: { iconName: "Refresh", iconType: VssIconType.Fabric },
                     disabled: this.state.bugBash.isNew(),
                     onClick: this._refreshBugBashItems
                 },
@@ -395,7 +395,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                     key: "newitem",
                     name: "New Item",
                     important: true,
-                    iconProps: { iconName: "Add", iconType: VssIconType.fabric },
+                    iconProps: { iconName: "Add", iconType: VssIconType.Fabric },
                     disabled: this.state.bugBash.isNew(),
                     onClick: () => {
                         StoresHub.bugBashItemStore.getNewBugBashItem().reset(false);
@@ -412,7 +412,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                 key: "save",
                 name: "Save",
                 important: true,
-                iconProps: { iconName: "Save", iconType: VssIconType.fabric },
+                iconProps: { iconName: "Save", iconType: VssIconType.Fabric },
                 disabled: !this.state.bugBash.isDirty() || !this.state.bugBash.isValid(),
                 onClick: this._saveBugBash
             },
@@ -420,7 +420,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                 key: "undo",
                 name: "Undo",
                 important: true,
-                iconProps: { iconName: "Undo", iconType: VssIconType.fabric },
+                iconProps: { iconName: "Undo", iconType: VssIconType.Fabric },
                 disabled: this.state.bugBash.isNew() || !this.state.bugBash.isDirty(),
                 onClick: this._revertBugBash
             },
@@ -428,7 +428,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                 key: "refresh",
                 name: "Refresh",
                 important: true,
-                iconProps: { iconName: "Refresh", iconType: VssIconType.fabric },
+                iconProps: { iconName: "Refresh", iconType: VssIconType.Fabric },
                 disabled: this.state.bugBash.isNew(),
                 onClick: this._refreshBugBash
             }
@@ -441,7 +441,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                 key: "refresh",
                 name: "Refresh",
                 important: true,
-                iconProps: { iconName: "Refresh", iconType: VssIconType.fabric },
+                iconProps: { iconName: "Refresh", iconType: VssIconType.Fabric },
                 disabled: this.state.bugBash.isNew(),
                 onClick: this._refreshBugBashItems
             }
@@ -455,7 +455,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                     key: "save",
                     name: "Save",
                     important: true,
-                    iconProps: { iconName: "Save", iconType: VssIconType.fabric },
+                    iconProps: { iconName: "Save", iconType: VssIconType.Fabric },
                     disabled: !this.state.bugBashDetails || !this.state.bugBashDetails.isDirty(),
                     onClick: this._saveBugBashDetails
                 },
@@ -463,7 +463,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                     key: "undo",
                     name: "Undo",
                     important: true,
-                    iconProps: { iconName: "Undo", iconType: VssIconType.fabric },
+                    iconProps: { iconName: "Undo", iconType: VssIconType.Fabric },
                     disabled: !this.state.bugBashDetails || !this.state.bugBashDetails.isDirty(),
                     onClick: this._revertBugBashDetails
                 },
@@ -471,7 +471,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                     key: "refresh",
                     name: "Refresh",
                     important: true,
-                    iconProps: { iconName: "Refresh", iconType: VssIconType.fabric },
+                    iconProps: { iconName: "Refresh", iconType: VssIconType.Fabric },
                     disabled: !this.state.bugBashDetails,
                     onClick: this._refreshBugBashDetails
                 },
@@ -479,7 +479,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                     key: "done",
                     name: "Done",
                     important: true,
-                    iconProps: { iconName: "Accept", iconType: VssIconType.fabric },
+                    iconProps: { iconName: "Accept", iconType: VssIconType.Fabric },
                     disabled: !this.state.bugBashDetails,
                     onClick: () => this.setState({ isDetailsInEditMode: false } as IBugBashViewState)
                 }
@@ -490,7 +490,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                     key: "edit",
                     name: "Edit",
                     important: true,
-                    iconProps: { iconName: "Edit", iconType: VssIconType.fabric },
+                    iconProps: { iconName: "Edit", iconType: VssIconType.Fabric },
                     disabled: !this.state.bugBashDetails,
                     onClick: () => this.setState({ isDetailsInEditMode: true } as IBugBashViewState)
                 },
@@ -498,7 +498,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                     key: "refresh",
                     name: "Refresh",
                     important: true,
-                    iconProps: { iconName: "Refresh", iconType: VssIconType.fabric },
+                    iconProps: { iconName: "Refresh", iconType: VssIconType.Fabric },
                     disabled: !this.state.bugBashDetails,
                     onClick: this._refreshBugBashDetails
                 }
@@ -540,7 +540,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
                 key: value,
                 iconProps: identity.imageUrl
                     ? {
-                          iconType: VssIconType.image,
+                          iconType: VssIconType.Image,
                           imageProps: {
                               src: identity.imageUrl
                           }

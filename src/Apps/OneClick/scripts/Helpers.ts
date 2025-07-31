@@ -1,6 +1,6 @@
 import { isInteger, isNumeric } from "Common/Utilities/Number";
 import { stringEquals } from "Common/Utilities/String";
-import * as parse from "date-fns/parse";
+import { parse } from "date-fns";
 import { Constants } from "OneClick/Constants";
 import { IRuleGroup } from "OneClick/Interfaces";
 import * as Macros from "OneClick/Macros/Macros";
@@ -33,7 +33,7 @@ export async function translateToFieldValue(value: string, fieldType?: WitContra
             case WitContracts.FieldType.Boolean:
                 return stringEquals(value, "True", true) || stringEquals(value, "1", true);
             case WitContracts.FieldType.DateTime:
-                return parse(value) || value;
+                return parse(value, "yyyy-MM-dd", new Date()) || value;
             case WitContracts.FieldType.Double:
                 return isNumeric(value) ? parseFloat(value) : value;
             case WitContracts.FieldType.Integer:

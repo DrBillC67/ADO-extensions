@@ -24,7 +24,7 @@ import { Modal } from "OfficeFabric/Modal";
 import { css } from "OfficeFabric/Utilities";
 import { VssIcon, VssIconType } from "VSSUI/VssIcon";
 
-const DragHandle: any = SortableHandle(() => <VssIcon className="drag-handle" iconName="GlobalNavButton" iconType={VssIconType.fabric} />);
+const DragHandle: any = SortableHandle(() => <VssIcon className="drag-handle" iconName="GlobalNavButton" iconType={VssIconType.Fabric} />);
 
 const SortableItem: any = SortableElement(({ value }) => {
     return (

@@ -16,7 +16,7 @@ import { GitRepoActions } from "Common/Flux/Actions/GitRepoActions";
 import { TeamActions } from "Common/Flux/Actions/TeamActions";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { PrimaryButton } from "OfficeFabric/Button";
-import { ComboBox, IComboBoxOption, IComboBoxProps } from "OfficeFabric/ComboBox";
+import { ComboBox, IComboBox, IComboBoxOption, IComboBoxProps } from "OfficeFabric/ComboBox";
 import { Label } from "OfficeFabric/Label";
 import { MessageBar, MessageBarType } from "OfficeFabric/MessageBar";
 import { WebApiTeam } from "TFS/Core/Contracts";
@@ -67,7 +67,7 @@ export class SettingsPanel extends BaseFluxComponent<IBaseFluxComponentProps, IS
                                 allowFreeform={false}
                                 autoComplete="on"
                                 selectedKey={this.state.newBugBashSettings.gitMediaRepo}
-                                onChanged={this._onRepoChange}
+                                onChange={this._onRepoChange}
                             />
                         </div>
                         <PrimaryButton className="save-button" disabled={!this._isSettingsDirty()} onClick={this._onSaveClick}>
@@ -85,7 +85,7 @@ export class SettingsPanel extends BaseFluxComponent<IBaseFluxComponentProps, IS
                                 allowFreeform={false}
                                 autoComplete="on"
                                 selectedKey={this.state.newUserSettings.associatedTeam}
-                                onChanged={this._onTeamChange}
+                                onChange={this._onTeamChange}
                             />
                         </div>
                         <PrimaryButton className="save-button" disabled={!this._isUserSettingsDirty()} onClick={this._onSaveUserSettingClick}>
@@ -185,13 +185,13 @@ export class SettingsPanel extends BaseFluxComponent<IBaseFluxComponentProps, IS
         return this.state.newUserSettings.associatedTeam !== this.state.origUserSettings.associatedTeam;
     }
 
-    private _onRepoChange = (option?: IComboBoxOption) => {
+            private _onRepoChange = (event: React.FormEvent<IComboBox>, option?: IComboBoxOption, index?: number, value?: string) => {
         const newSettings = { ...this.state.newBugBashSettings };
         newSettings.gitMediaRepo = option.key as string;
         this.setState({ newBugBashSettings: newSettings } as ISettingsPanelState);
     };
 
-    private _onTeamChange = (option?: IComboBoxOption) => {
+            private _onTeamChange = (event: React.FormEvent<IComboBox>, option?: IComboBoxOption, index?: number, value?: string) => {
         const newSettings = { ...this.state.newUserSettings };
         newSettings.associatedTeam = option.key as string;
         this.setState({ newUserSettings: newSettings } as ISettingsPanelState);

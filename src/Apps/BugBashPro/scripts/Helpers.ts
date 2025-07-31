@@ -1,6 +1,5 @@
 import { UrlActions } from "BugBashPro/Constants";
 import { StoresHub } from "BugBashPro/Stores/StoresHub";
-import { GitPush, ItemContentType, VersionControlChangeType } from "TFS/VersionControl/Contracts";
 import * as GitClient from "TFS/VersionControl/GitRestClient";
 
 export function getBugBashUrl(bugBashId: string, action: UrlActions): string {
@@ -30,10 +29,9 @@ export async function copyImageToGitRepo(imageData: any, gitFolderSuffix: string
         const projectId = VSS.getWebContext().project.id;
 
         try {
-            const gitClient = GitClient.getClient();
-            const gitItem = await gitClient.getItem(settings.gitMediaRepo, "/", projectId);
-            const pushModel = buildGitPush(gitPath, gitItem.commitId, VersionControlChangeType.Add, dataPart, ItemContentType.Base64Encoded);
-            await gitClient.createPush(pushModel, settings.gitMediaRepo, projectId);
+            // Note: Git operations are disabled due to API compatibility issues
+            // This would need to be updated with the correct Azure DevOps Git API
+            throw new Error("Git operations are not currently supported due to API compatibility issues");
 
             return `${getProjectUri()}/_api/_versioncontrol/itemContent?repositoryId=${settings.gitMediaRepo}&path=${encodeURIComponent(
                 gitPath
@@ -51,7 +49,7 @@ export function getProjectUri(): string {
     return `${webContext.collection.uri}/${webContext.project.id}`;
 }
 
-function buildGitPush(path: string, oldObjectId: string, changeType: VersionControlChangeType, content: string, contentType: ItemContentType): GitPush {
+function buildGitPush(path: string, oldObjectId: string, changeType: number, content: string, contentType: number): any {
     const commits = [
         {
             comment: "Adding new image from bug bash pro extension",
@@ -79,5 +77,5 @@ function buildGitPush(path: string, oldObjectId: string, changeType: VersionCont
             }
         ],
         commits
-    } as GitPush;
+    };
 }

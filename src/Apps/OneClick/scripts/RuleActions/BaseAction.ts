@@ -103,7 +103,7 @@ export abstract class BaseAction extends Observable<void> {
 
     public abstract getFriendlyName(): string;
     public abstract getDescription(): string;
-    public abstract async run(): Promise<void>;
+    public abstract run(): Promise<void>;
     public abstract render(workItemType: string): React.ReactNode;
     public abstract isValid(): boolean;
 
@@ -116,6 +116,6 @@ export abstract class BaseAction extends Observable<void> {
     }
 
     private _emitChanged() {
-        this.notify(null, null);
+        this.notify();
     }
 }

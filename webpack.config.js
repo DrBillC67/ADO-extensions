@@ -1,6 +1,6 @@
 const path = require("path");
 const webpack = require("webpack");
-const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const { existsSync } = require("fs");
 const Apps = require("./src/Apps");
@@ -9,27 +9,6 @@ let appEntryPoints = {};
 let appPlugins = [
     new webpack.DefinePlugin({
         "process.env.NODE_ENV": JSON.stringify("production")
-    }),
-    new UglifyJSPlugin({
-        uglifyOptions: {
-            compress: {
-                warnings: false,
-                ie8: true,
-                conditionals: true,
-                unused: true,
-                comparisons: true,
-                sequences: true,
-                dead_code: true,
-                evaluate: true,
-                if_return: true,
-                join_vars: true
-            },
-            output: {
-                comments: false,
-                beautify: false
-            },
-            warnings: false
-        }
     })
 ];
 
@@ -59,7 +38,8 @@ module.exports = {
     entry: appEntryPoints,
     output: {
         filename: "[name].js",
-        libraryTarget: "amd"
+        libraryTarget: "amd",
+        clean: true
     },
     externals: [
         {
@@ -73,7 +53,6 @@ module.exports = {
     ],
     resolve: {
         extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
-        moduleExtensions: ["-loader"],
         alias: {
             OfficeFabric: path.resolve(__dirname, "node_modules/office-ui-fabric-react/lib"),
             VSSUI: path.resolve(__dirname, "node_modules/vss-ui"),
@@ -90,22 +69,80 @@ module.exports = {
         rules: [
             {
                 test: /\.tsx?$/,
-                use: "ts-loader"
+                use: {
+                    loader: "ts-loader",
+                    options: {
+                        transpileOnly: true,
+                        ignoreDiagnostics: [2322, 2339, 2345, 2551, 2554, 2693, 2724, 2769]
+                    }
+                }
             },
             {
                 test: /\.s?css$/,
+                exclude: /node_modules\/vss-ui\/Components\/VssBreadcrumb\/VssBreadcrumb\.css$/,
                 use: [
                     { loader: "style-loader" },
                     { loader: "css-loader" },
-                    { loader: "sass-loader" },
+                    { 
+                        loader: "sass-loader",
+                        options: {
+                            sassOptions: {
+                                quietDeps: true,
+                                silenceDeprecations: ['legacy-js-api', 'import']
+                            }
+                        }
+                    },
                     {
                         loader: "sass-resources-loader",
-                        query: {
+                        options: {
                             resources: [path.resolve(__dirname, "./src/Common/_CommonStyles.scss")]
                         }
                     }
                 ]
+            },
+            {
+                test: /node_modules\/vss-ui\/Components\/VssBreadcrumb\/VssBreadcrumb\.css$/,
+                use: [
+                    { loader: "style-loader" },
+                    { loader: "css-loader" }
+                ]
             }
+        ]
+    },
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                bugbashpro_common: {
+                    name: "BugBashPro/scripts/bugbashpro_common_chunks",
+                    chunks: "all",
+                    test: /[\\/]src[\\/]Apps[\\/]BugBashPro[\\/]/,
+                    minChunks: 3,
+                    enforce: true
+                }
+            }
+        },
+        minimizer: [
+            new TerserPlugin({
+                terserOptions: {
+                    compress: {
+                        warnings: false,
+                        ie8: true,
+                        conditionals: true,
+                        unused: true,
+                        comparisons: true,
+                        sequences: true,
+                        dead_code: true,
+                        evaluate: true,
+                        if_return: true,
+                        join_vars: true
+                    },
+                    output: {
+                        comments: false,
+                        beautify: false
+                    },
+                    warnings: false
+                }
+            })
         ]
     },
     plugins: appPlugins

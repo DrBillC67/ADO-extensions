@@ -93,7 +93,7 @@ export class SettingsPanel extends React.Component<ISettingsPanelProps, ISetting
                 <div className="settings-controls">
                     <div className="settings-control-container">
                         <InfoLabel label="Max count" info="Maximum number of work items to retrieve" />
-                        <TextField value={`${this.state.top}`} onChanged={this._onTopValueChange} onGetErrorMessage={this._getTopError} />
+                        <TextField value={`${this.state.top}`} onChange={this._onTopValueChange} onGetErrorMessage={this._getTopError} />
                     </div>
 
                     <div className="settings-control-container">
@@ -153,7 +153,8 @@ export class SettingsPanel extends React.Component<ISettingsPanelProps, ISetting
         return 0;
     }
 
-    private _onTopValueChange = (newValue: string) => {
+    private _onTopValueChange = (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
+        const value = newValue || (event.target as HTMLInputElement).value;
         this._updateTop(newValue);
     };
 

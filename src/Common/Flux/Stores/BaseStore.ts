@@ -68,7 +68,7 @@ export abstract class BaseStore<TCollection, TItem, TKey> extends Observable<voi
     public abstract getKey(): string;
 
     protected emitChanged() {
-        this.notify(null, null);
+        this.notify();
     }
 
     protected abstract initializeActionListeners();

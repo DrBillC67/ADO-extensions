@@ -17,12 +17,8 @@ import {
 import { delay, DelayedFunction } from "Common/Utilities/Core";
 import { isNullOrEmpty } from "Common/Utilities/String";
 import { css } from "OfficeFabric/Utilities";
-import Editor from "roosterjs-editor-core/lib/editor/Editor";
-import EditorOptions from "roosterjs-editor-core/lib/editor/EditorOptions";
-import EditorPlugin from "roosterjs-editor-core/lib/editor/EditorPlugin";
-import ContentEdit from "roosterjs-editor-plugins/lib/ContentEdit/ContentEdit";
-import DefaultShortcut from "roosterjs-editor-plugins/lib/DefaultShortcut/DefaultShortcut";
-import HyperLink from "roosterjs-editor-plugins/lib/HyperLink/HyperLink";
+import { Editor, IEditorOptions as EditorOptions, EditorPlugin } from "roosterjs-editor-core";
+import { ContentEdit, HyperLink } from "roosterjs-editor-plugins";
 
 export interface IRichEditorProps extends IBaseFluxComponentProps {
     value?: string;
@@ -59,9 +55,8 @@ export class RichEditor extends BaseFluxComponent<IRichEditorProps, IRichEditorS
     public componentDidMount() {
         super.componentDidMount();
         const plugins: EditorPlugin[] = [
-            new DefaultShortcut(),
-            new HyperLink(href => `${href}.\n Ctrl-Click to follow link.`),
-            new ContentEdit(),
+            new ContentEdit() as any,
+            new HyperLink() as any,
             new ContentChangedPlugin(this._onChange)
         ];
         if (this.props.editorOptions && this.props.editorOptions.getPastedImageUrl) {

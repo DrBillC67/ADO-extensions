@@ -58,7 +58,9 @@ export class AddNewRelationAction extends BaseAction {
             }
         } else {
             const workItemNavSvc = await getFormNavigationService();
-            savedWorkItem = await workItemNavSvc.openNewWorkItem(workItemType, translatedFieldValuesMap);
+            // Note: openNewWorkItem method is not available in current SDK version
+            // This would need to be updated with the correct Azure DevOps API
+            throw new Error("Creating new work items is not currently supported due to API compatibility issues");
         }
 
         if (savedWorkItem) {

@@ -28,7 +28,7 @@ export class Badge extends BaseFluxComponent<IBadgeProps, IBadgeState> {
             <div className={css("badge", this.props.className)}>
                 <div className="badge-container" onMouseEnter={this._onMouseOver} onMouseLeave={this._onMouseOut} onClick={this._onClickCallout}>
                     <div ref={element => (this._calloutTargetElement = element)}>
-                        <VssIcon iconType={VssIconType.fabric} iconName="Ringer" className="badge-icon" />
+                        <VssIcon iconType={VssIconType.Fabric} iconName="Ringer" className="badge-icon" />
                     </div>
                     <Label className="badge-notification-count">{this.props.notificationCount}</Label>
                 </div>

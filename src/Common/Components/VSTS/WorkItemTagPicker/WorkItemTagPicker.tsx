@@ -16,7 +16,7 @@ import { ValidationState } from "OfficeFabric/components/pickers/BasePicker.type
 import { ITag, TagPicker } from "OfficeFabric/components/pickers/TagPicker/TagPicker";
 import { Spinner, SpinnerSize } from "OfficeFabric/Spinner";
 import { css } from "OfficeFabric/Utilities";
-import { WebApiTagDefinition } from "TFS/Core/Contracts";
+// WebApiTagDefinition is defined globally in vss.d.ts
 
 export interface IWorkItemTagPickerProps extends IBaseFluxComponentProps {
     selectedTags?: string[];

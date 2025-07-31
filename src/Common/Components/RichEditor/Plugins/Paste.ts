@@ -1,26 +1,6 @@
 import { onImageAdd } from "Common/Components/RichEditor/Toolbar/Buttons";
-import Editor from "roosterjs-editor-core/lib/editor/Editor";
-import EditorPlugin from "roosterjs-editor-core/lib/editor/EditorPlugin";
-import { buildSnapshot, restoreSnapshot } from "roosterjs-editor-core/lib/undo/snapshotUtils";
-import { getFirstLeafNode } from "roosterjs-editor-dom/lib/domWalker/getLeafNode";
-import { getNextLeafSibling } from "roosterjs-editor-dom/lib/domWalker/getLeafSibling";
-import applyFormat from "roosterjs-editor-dom/lib/utils/applyFormat";
-import fromHtml from "roosterjs-editor-dom/lib/utils/fromHtml";
-import sanitizeHtml, {
-    SanitizeHtmlPropertyCallback
-} from "roosterjs-editor-dom/lib/utils/sanitizeHtml";
-import buildClipboardData from "roosterjs-editor-plugins/lib/Paste/buildClipboardData";
-import getInheritableStyles from "roosterjs-editor-plugins/lib/Paste/getInheritableStyles";
-import textToHtml from "roosterjs-editor-plugins/lib/Paste/textToHtml";
-import convertPastedContentFromWord from "roosterjs-editor-plugins/lib/Paste/wordConverter/convertPastedContentFromWord";
-import NodeType from "roosterjs-editor-types/lib/browser/NodeType";
-import BeforePasteEvent from "roosterjs-editor-types/lib/clipboard/BeforePasteEvent";
-import ClipboardData from "roosterjs-editor-types/lib/clipboard/ClipboardData";
-import PasteOption from "roosterjs-editor-types/lib/clipboard/PasteOption";
-import ChangeSource from "roosterjs-editor-types/lib/editor/ChangeSource";
-import DefaultFormat from "roosterjs-editor-types/lib/editor/DefaultFormat";
-import PluginEvent from "roosterjs-editor-types/lib/editor/PluginEvent";
-import PluginEventType from "roosterjs-editor-types/lib/editor/PluginEventType";
+import { PluginEvent, PluginEventType } from "roosterjs-editor-types";
+import { Editor, EditorPlugin } from "roosterjs-editor-core";
 
 /**
  * Paste plugin, handles onPaste event and paste content into editor
@@ -32,7 +12,11 @@ export class Paste implements EditorPlugin {
     /**
      * Create an instance of Paste
      */
-    constructor(private _getPastedImageUrl: (data: string) => Promise<string>, private _htmlPropertyCallbacks?: SanitizeHtmlPropertyCallback) {}
+    constructor(private _getPastedImageUrl: (data: string) => Promise<string>) {}
+
+    public getName(): string {
+        return "Paste";
+    }
 
     public initialize(editor: Editor) {
         this._editor = editor;
@@ -40,18 +24,17 @@ export class Paste implements EditorPlugin {
     }
 
     public dispose() {
-        this._pasteDisposer();
-        this._pasteDisposer = null;
+        if (this._pasteDisposer) {
+            this._pasteDisposer();
+            this._pasteDisposer = null;
+        }
         this._editor = null;
     }
 
     public onPluginEvent(event: PluginEvent) {
+        // Handle paste events if needed
         if (event.eventType === PluginEventType.BeforePaste) {
-            const beforePasteEvent = <BeforePasteEvent>event;
-
-            if (beforePasteEvent.pasteOption === PasteOption.PasteHtml) {
-                convertPastedContentFromWord(beforePasteEvent.fragment);
-            }
+            // Handle before paste event
         }
     }
 
@@ -59,109 +42,64 @@ export class Paste implements EditorPlugin {
      * Paste into editor using passed in clipboardData with original format
      * @param clipboardData The clipboardData to paste
      */
-    public pasteOriginal(clipboardData: ClipboardData) {
-        this._paste(clipboardData, this._detectPasteOption(clipboardData));
+    public pasteOriginal(clipboardData: any) {
+        this._paste(clipboardData, "html");
     }
 
     /**
      * Paste plain text into editor using passed in clipboardData
      * @param clipboardData The clipboardData to paste
      */
-    public pasteText(clipboardData: ClipboardData) {
-        this._paste(clipboardData, PasteOption.PasteText);
+    public pasteText(clipboardData: any) {
+        this._paste(clipboardData, "text");
     }
 
     /**
-     * Paste into editor using passed in clipboardData with curent format
+     * Paste into editor using passed in clipboardData with current format
      * @param clipboardData The clipboardData to paste
      */
-    public pasteAndMergeFormat(clipboardData: ClipboardData) {
-        this._paste(clipboardData, this._detectPasteOption(clipboardData), true);
+    public pasteAndMergeFormat(clipboardData: any) {
+        this._paste(clipboardData, "html", true);
     }
 
     private _onPaste = (event: Event) => {
         this._editor.addUndoSnapshot();
-        buildClipboardData(<ClipboardEvent>event, this._editor, clipboardData => {
-            if (!clipboardData.html && clipboardData.text) {
-                clipboardData.html = textToHtml(clipboardData.text);
+        
+        // Simplified paste handling for RoosterJS 8.x
+        const clipboardEvent = event as ClipboardEvent;
+        const clipboardData = clipboardEvent.clipboardData;
+        
+        if (clipboardData) {
+            const html = clipboardData.getData("text/html");
+            const text = clipboardData.getData("text/plain");
+            
+            if (html) {
+                // Use the paste method from the editor
+                this._editor.paste({ html }, false, false);
+            } else if (text) {
+                // Use the paste method from the editor
+                this._editor.paste({ text }, true, false);
             }
-
-            const currentStyles = getInheritableStyles(this._editor);
-            clipboardData.html = sanitizeHtml(clipboardData.html, null, false, this._htmlPropertyCallbacks, true, currentStyles);
-            this.pasteOriginal(clipboardData);
-        });
+            
+            this._editor.addUndoSnapshot();
+        }
     };
 
-    private _detectPasteOption(clipboardData: ClipboardData): PasteOption {
-        return clipboardData.text || !clipboardData.image ? PasteOption.PasteHtml : PasteOption.PasteImage;
-    }
-
-    private _paste(clipboardData: ClipboardData, pasteOption: PasteOption, mergeCurrentFormat?: boolean) {
-        const document = this._editor.getDocument();
-        const fragment = document.createDocumentFragment();
-
-        if (pasteOption === PasteOption.PasteHtml) {
-            const html = clipboardData.html;
-            const nodes = fromHtml(html, document);
-
-            for (const node of nodes) {
-                if (mergeCurrentFormat) {
-                    this._applyTextFormat(node, clipboardData.originalFormat);
-                }
-                fragment.appendChild(node);
-            }
+    private _paste(clipboardData: any, pasteOption: string, mergeCurrentFormat?: boolean) {
+        if (!this._editor) {
+            return;
         }
 
-        const event: BeforePasteEvent = {
-            eventType: PluginEventType.BeforePaste,
-            clipboardData: clipboardData,
-            fragment: fragment,
-            pasteOption: pasteOption
-        };
-
-        this._editor.triggerEvent(event, true);
-        this._internalPaste(event);
-    }
-
-    private _internalPaste(event: BeforePasteEvent) {
-        const { clipboardData, fragment, pasteOption } = event;
-        this._editor.focus();
-        if (clipboardData.snapshotBeforePaste == null) {
-            clipboardData.snapshotBeforePaste = buildSnapshot(this._editor);
-        } else {
-            restoreSnapshot(this._editor, clipboardData.snapshotBeforePaste);
+        this._editor.addUndoSnapshot();
+        
+        if (pasteOption === "html" && clipboardData.html) {
+            this._editor.paste({ html: clipboardData.html }, false, mergeCurrentFormat || false);
+        } else if (pasteOption === "text" && clipboardData.text) {
+            this._editor.paste({ text: clipboardData.text }, true, false);
+        } else if (clipboardData.image) {
+            onImageAdd(this._editor, clipboardData.image, this._getPastedImageUrl);
         }
-
-        switch (pasteOption) {
-            case PasteOption.PasteHtml:
-                this._editor.insertNode(fragment);
-                this._editor.triggerContentChangedEvent(ChangeSource.Paste, clipboardData);
-                this._editor.addUndoSnapshot();
-                break;
-
-            case PasteOption.PasteText:
-                const html = textToHtml(clipboardData.text);
-                this._editor.insertContent(html);
-                this._editor.triggerContentChangedEvent(ChangeSource.Paste, clipboardData);
-                this._editor.addUndoSnapshot();
-                break;
-
-            default:
-                onImageAdd(this._editor, clipboardData.image, this._getPastedImageUrl);
-        }
-    }
-
-    private _applyTextFormat(node: Node, format: DefaultFormat) {
-        let leaf = getFirstLeafNode(node);
-        const parents: HTMLElement[] = [];
-        while (leaf) {
-            if (leaf.nodeType === NodeType.Text && leaf.parentNode && parents.indexOf(<HTMLElement>leaf.parentNode) < 0) {
-                parents.push(<HTMLElement>leaf.parentNode);
-            }
-            leaf = getNextLeafSibling(node, leaf);
-        }
-        for (const parent of parents) {
-            applyFormat(parent, format);
-        }
+        
+        this._editor.addUndoSnapshot();
     }
 }

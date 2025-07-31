@@ -17,6 +17,7 @@ export interface IThrottledTextFieldProps extends ITextFieldProps {
     delay?: number;
     info?: string;
     required?: boolean;
+    onChanged?: (value: string) => void;
 }
 
 export interface IThrottledTextFieldState extends IBaseFluxComponentState {
@@ -37,7 +38,7 @@ export class ThrottledTextField extends BaseFluxComponent<IThrottledTextFieldPro
         const props = {
             ...this.props,
             value: this.state.internalValue,
-            onChanged: this._onChange,
+            onChange: this._onChange,
             className: "throttled-text-field-text",
             componentRef: this._refCallback
         };
@@ -98,7 +99,8 @@ export class ThrottledTextField extends BaseFluxComponent<IThrottledTextFieldPro
         this._component = component;
     };
 
-    private _onChange = (value: string) => {
+    private _onChange = (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
+        const value = newValue || (event.target as HTMLInputElement).value;
         this._disposeDelayedFunction();
 
         const fireChange = () => {

@@ -11,7 +11,10 @@ import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoaded
 import clearFormat from "roosterjs-editor-api/lib/format/clearFormat";
 import removeLink from "roosterjs-editor-api/lib/format/removeLink";
 import setAlignment from "roosterjs-editor-api/lib/format/setAlignment";
-import setIndentation from "roosterjs-editor-api/lib/format/setIndentation";
+import setBackgroundColor from "roosterjs-editor-api/lib/format/setBackgroundColor";
+import setFontName from "roosterjs-editor-api/lib/format/setFontName";
+import setFontSize from "roosterjs-editor-api/lib/format/setFontSize";
+import setTextColor from "roosterjs-editor-api/lib/format/setTextColor";
 import toggleBold from "roosterjs-editor-api/lib/format/toggleBold";
 import toggleBullet from "roosterjs-editor-api/lib/format/toggleBullet";
 import toggleItalic from "roosterjs-editor-api/lib/format/toggleItalic";
@@ -20,9 +23,8 @@ import toggleStrikethrough from "roosterjs-editor-api/lib/format/toggleStrikethr
 import toggleSubscript from "roosterjs-editor-api/lib/format/toggleSubscript";
 import toggleSuperscript from "roosterjs-editor-api/lib/format/toggleSuperscript";
 import toggleUnderline from "roosterjs-editor-api/lib/format/toggleUnderline";
-import Editor from "roosterjs-editor-core/lib/editor/Editor";
-import Alignment from "roosterjs-editor-types/lib/format/Alignment";
-import Indentation from "roosterjs-editor-types/lib/format/Indentation";
+import { Editor } from "roosterjs-editor-core";
+import setIndentation from "roosterjs-editor-api/lib/format/setIndentation";
 import { FileInputResult } from "VSSUI/FileInput";
 import { closest } from "VSSUI/Utilities/Internal";
 
@@ -43,72 +45,72 @@ export const fullscreen: IRichEditorToolbarButton = {
 export const bold: IRichEditorToolbarButton = {
     iconName: IconNames.Bold,
     title: "Bold (Ctrl + B)",
-    onClick: toggleBold
+    onClick: (editor, options) => toggleBold.default(editor)
 };
 export const italic: IRichEditorToolbarButton = {
     iconName: IconNames.Italic,
     title: "Italic (Ctrl + I)",
-    onClick: toggleItalic
+    onClick: (editor, options) => toggleItalic.default(editor)
 };
 export const underline: IRichEditorToolbarButton = {
     iconName: IconNames.Underline,
     title: "Underline (Ctrl + U)",
-    onClick: toggleUnderline
+    onClick: (editor, options) => toggleUnderline.default(editor)
 };
 export const bullets: IRichEditorToolbarButton = {
     iconName: IconNames.BulletedList,
     title: "Bulletted list (Ctrl + .)",
-    onClick: toggleBullet
+    onClick: (editor, options) => toggleBullet.default(editor)
 };
 export const numbering: IRichEditorToolbarButton = {
     iconName: IconNames.NumberedList,
     title: "Numbered list (Ctrl + /)",
-    onClick: toggleNumbering
+    onClick: (editor, options) => toggleNumbering.default(editor)
 };
 export const indent: IRichEditorToolbarButton = {
     iconName: IconNames.IncreaseIndentLegacy,
     title: "Increase indent",
-    onClick: editor => setIndentation(editor, Indentation.Increase)
+    onClick: (editor, options) => setIndentation.default(editor, 1)
 };
 export const outdent: IRichEditorToolbarButton = {
     iconName: IconNames.DecreaseIndentLegacy,
     title: "Decrease indent",
-    onClick: editor => setIndentation(editor, Indentation.Decrease)
+    onClick: (editor, options) => setIndentation.default(editor, -1)
 };
 export const alignLeft: IRichEditorToolbarButton = {
     iconName: IconNames.AlignLeft,
     title: "Align to left",
-    onClick: editor => setAlignment(editor, Alignment.Left)
+    onClick: (editor, options) => setAlignment.default(editor, 0)
 };
 export const alignCenter: IRichEditorToolbarButton = {
     iconName: IconNames.AlignCenter,
     title: "Align to center",
-    onClick: editor => setAlignment(editor, Alignment.Center)
+    onClick: (editor, options) => setAlignment.default(editor, 1)
 };
 export const alignRight: IRichEditorToolbarButton = {
     iconName: IconNames.AlignRight,
     title: "Align to right",
-    onClick: editor => setAlignment(editor, Alignment.Right)
+    onClick: (editor, options) => setAlignment.default(editor, 2)
 };
 export const unlink: IRichEditorToolbarButton = {
     iconName: IconNames.RemoveLink,
     title: "Unlink",
-    onClick: removeLink
+    onClick: (editor, options) => removeLink.default(editor)
 };
 export const subscript: IRichEditorToolbarButton = {
     iconName: IconNames.Subscript,
     title: "Subscript",
-    onClick: toggleSubscript
+    onClick: (editor, options) => toggleSubscript.default(editor)
 };
 export const superscript: IRichEditorToolbarButton = {
     iconName: IconNames.Superscript,
     title: "Superscript",
-    onClick: toggleSuperscript
+    onClick: (editor, options) => toggleSuperscript.default(editor)
 };
 export const strikethrough: IRichEditorToolbarButton = {
     iconName: IconNames.Strikethrough,
     title: "Strike through",
-    onClick: toggleStrikethrough
+    onClick: (editor, options) => toggleStrikethrough.default(editor)
 };
 export const undo: IRichEditorToolbarButton = {
     iconName: IconNames.Undo,
@@ -123,7 +125,7 @@ export const redo: IRichEditorToolbarButton = {
 export const removeformat: IRichEditorToolbarButton = {
     iconName: IconNames.ClearFormatting,
     title: "Remove formatting",
-    onClick: clearFormat
+    onClick: (editor, options) => clearFormat.default(editor, 0)
 };
 export const uploadImage: IRichEditorToolbarButton = {
     iconName: IconNames.PictureFill,
@@ -190,3 +192,5 @@ export const ButtonMap: IDictionaryStringTo<IRichEditorToolbarButton> = {
     [RichEditorToolbarButtonNames.btnFullscreen]: fullscreen,
     [RichEditorToolbarButtonNames.btnUploadImage]: uploadImage
 };
+
+

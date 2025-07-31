@@ -38,7 +38,7 @@ export class PatternControl extends WorkItemFieldControl<string, IPatternControl
                     className={css("pattern-control", { invalid: !!error })}
                     value={value || ""}
                     borderless={!isActive}
-                    onChanged={this._onChange}
+                    onChange={this._onChange}
                     onKeyDown={this._onInputKeyDown}
                     onMouseOver={this._onMouseOver}
                     onMouseOut={this._onMouseOut}
@@ -92,7 +92,8 @@ export class PatternControl extends WorkItemFieldControl<string, IPatternControl
         this.setState({ focussed: false });
     };
 
-    private _onChange = (value: string) => {
+    private _onChange = (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
+        const value = newValue || (event.target as HTMLInputElement).value;
         this.onValueChanged(value);
     };
 }

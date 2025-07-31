@@ -3,7 +3,7 @@ import "./BugBashDetails.scss";
 import * as React from "react";
 
 import { LongTextActions } from "BugBashPro/Actions/LongTextActions";
-import { RichEditorComponent } from "BugBashPro/Components/RichEditorComponent";
+// import { RichEditorComponent } from "BugBashPro/Components/RichEditorComponent";
 import { ErrorKeys } from "BugBashPro/Constants";
 import { copyImageToGitRepo } from "BugBashPro/Helpers";
 import { StoresHub } from "BugBashPro/Stores/StoresHub";
@@ -53,13 +53,11 @@ export class BugBashDetails extends BaseFluxComponent<IBugBashDetailsProps, IBug
 
                 <div className="bugbash-details-contents" onKeyDown={this._onEditorKeyDown} tabIndex={0}>
                     {this.props.isEditMode && (
-                        <RichEditorComponent
+                        <textarea
                             value={this.state.longText.Text}
-                            delay={200}
-                            editorOptions={{
-                                getPastedImageUrl: this._pasteImage
-                            }}
-                            onChange={this._onChange}
+                            onChange={(e) => this._onChange(e.target.value)}
+                            placeholder="Enter bug bash details..."
+                            style={{ width: '100%', minHeight: '200px' }}
                         />
                     )}
 

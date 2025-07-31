@@ -18,12 +18,12 @@ export class RuleGroup extends Observable<void> {
     }
 
     private _originalModel: IRuleGroup;
-    private _updates: IRuleGroup;
+    private _updates: { [key: string]: any };
 
     constructor(model: IRuleGroup) {
         super();
         this._originalModel = { ...model };
-        this._updates = {} as IRuleGroup;
+        this._updates = {};
     }
 
     public get id(): string {
@@ -85,6 +85,6 @@ export class RuleGroup extends Observable<void> {
     }
 
     private _emitChanged() {
-        this.notify(null, null);
+        this.notify();
     }
 }

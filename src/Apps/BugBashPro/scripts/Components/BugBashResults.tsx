@@ -222,7 +222,7 @@ export class BugBashResults extends BaseFluxComponent<IBugBashResultsProps, IBug
                     className="bugbash-item-grid"
                     selection={this._selection}
                     getKey={this._getBugBashItemId}
-                    setKey={`bugbash-item-grid-${this.state.gridKeyCounter}`}
+                    key={`bugbash-item-grid-${this.state.gridKeyCounter}`}
                     onItemInvoked={this._onItemInvoked}
                     actionsColumnKey={BugBashItemFieldNames.Title}
                     getMenuItems={this._getGridContextMenuItems}

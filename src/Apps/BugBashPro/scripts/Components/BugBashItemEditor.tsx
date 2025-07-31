@@ -3,7 +3,7 @@ import "./BugBashItemEditor.scss";
 import * as React from "react";
 
 import { BugBashItemCommentActions } from "BugBashPro/Actions/BugBashItemCommentActions";
-import { RichEditorComponent } from "BugBashPro/Components/RichEditorComponent";
+// import { RichEditorComponent } from "BugBashPro/Components/RichEditorComponent";
 import {
     BugBashFieldNames, BugBashItemFieldNames, ErrorKeys, SizeLimits, UrlActions
 } from "BugBashPro/Constants";
@@ -178,29 +178,25 @@ export class BugBashItemEditor extends BaseFluxComponent<IBugBashItemEditorProps
                         />
                     )}
 
-                    <RichEditorComponent
-                        className="item-description-container"
-                        value={description}
-                        label="Description"
-                        delay={200}
-                        editorOptions={{
-                            getPastedImageUrl: this._pasteImage,
-                            buttons: DEFAULT_BUTTONS
-                        }}
-                        onChange={this._onDescriptionChange}
-                    />
+                    <div className="item-description-container">
+                        <Label>Description</Label>
+                        <textarea
+                            value={description}
+                            onChange={(e) => this._onDescriptionChange(e.target.value)}
+                            placeholder="Enter description..."
+                            style={{ width: '100%', minHeight: '150px' }}
+                        />
+                    </div>
 
-                    <RichEditorComponent
-                        className="item-comments-editor-container"
-                        label="Discussion"
-                        value={item.newComment || ""}
-                        delay={200}
-                        editorOptions={{
-                            getPastedImageUrl: this._pasteImage,
-                            buttons: []
-                        }}
-                        onChange={this._onCommentChange}
-                    />
+                    <div className="item-comments-editor-container">
+                        <Label>Discussion</Label>
+                        <textarea
+                            value={item.newComment || ""}
+                            onChange={(e) => this._onCommentChange(e.target.value)}
+                            placeholder="Enter comment..."
+                            style={{ width: '100%', minHeight: '100px' }}
+                        />
+                    </div>
 
                     <div className="item-comments-container">{this._renderComments()}</div>
                 </div>

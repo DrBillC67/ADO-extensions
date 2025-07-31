@@ -125,6 +125,7 @@ export class RelatedWits extends BaseFluxComponent<IBaseFluxComponentProps, IRel
                     </Panel>
                     <Hub
                         className="related-wits-hub"
+                        title="Related Work Items"
                         hideFullScreenToggle={true}
                         hubViewState={this._hubViewState}
                         commands={[
@@ -133,7 +134,7 @@ export class RelatedWits extends BaseFluxComponent<IBaseFluxComponentProps, IRel
                                 name: "Refresh",
                                 disabled: this.state.workItems == null || this.state.isNew,
                                 important: true,
-                                iconProps: { iconName: "Refresh", iconType: VssIconType.fabric },
+                                iconProps: { iconName: "Refresh", iconType: VssIconType.Fabric },
                                 onClick: this._refreshList
                             },
                             {
@@ -141,14 +142,14 @@ export class RelatedWits extends BaseFluxComponent<IBaseFluxComponentProps, IRel
                                 name: "Settings",
                                 disabled: this.state.workItems == null || this.state.isNew,
                                 important: true,
-                                iconProps: { iconName: "Settings", iconType: VssIconType.fabric },
+                                iconProps: { iconName: "Settings", iconType: VssIconType.Fabric },
                                 onClick: () => this.setState({ settingsPanelOpen: !this.state.settingsPanelOpen })
                             }
                         ]}
                     >
                         <HubHeader title="Related work items" />
                         <FilterBar componentRef={this._resolveFilterBar}>
-                            <KeywordFilterBarItem filterItemKey={"keyword"} />
+                            <KeywordFilterBarItem filterItemKey={"keyword"} value="" onChanged={() => {}} />
                             {this._getPickListFilterBarItem("Work Item Type", WorkItemFieldNames.WorkItemType)}
                             {this._getPickListFilterBarItem("State", WorkItemFieldNames.State)}
                             {this._getPickListFilterBarItem("Assigned To", WorkItemFieldNames.AssignedTo)}
@@ -354,7 +355,7 @@ export class RelatedWits extends BaseFluxComponent<IBaseFluxComponentProps, IRel
 
     private async _createQuery(fieldsToSeek: string[], sortByField: string): Promise<{ project: string; wiql: string }> {
         const workItemFormService = await getFormService();
-        const fieldValues = await workItemFormService.getFieldValues(fieldsToSeek, true);
+        const fieldValues = await workItemFormService.getFieldValues();
         const witId = await workItemFormService.getId();
         const project = (await workItemFormService.getFieldValue("System.TeamProject")) as string;
 
@@ -467,7 +468,7 @@ export class RelatedWits extends BaseFluxComponent<IBaseFluxComponentProps, IRel
                 key: key,
                 iconProps: identity.imageUrl
                     ? {
-                          iconType: VssIconType.image,
+                          iconType: VssIconType.Image,
                           imageProps: {
                               src: identity.imageUrl
                           }

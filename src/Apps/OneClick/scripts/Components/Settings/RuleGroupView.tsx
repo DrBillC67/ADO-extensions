@@ -104,13 +104,13 @@ export class RuleGroupView extends BaseFluxComponent<IRuleGroupViewProps, IRuleG
                         iconProps={
                             isPersonalOrGlobalRuleGroup(this.state.ruleGroup)
                                 ? {
-                                      iconType: VssIconType.fabric,
+                                      iconType: 0, // VssIconType.Fabric
                                       title: this.state.ruleGroup.description,
                                       className: "info-button",
                                       iconName: "Info"
                                   }
                                 : {
-                                      iconType: VssIconType.fabric,
+                                      iconType: 0, // VssIconType.Fabric
                                       onClick: this._toggleSubscription,
                                       title: this.state.isSubscribed ? "Unsubscribe" : "Subscribe",
                                       className: "subscribe-button",
@@ -123,7 +123,7 @@ export class RuleGroupView extends BaseFluxComponent<IRuleGroupViewProps, IRuleG
                                 key: "witname",
                                 onClick: this._onHeaderLinkClick,
                                 leftIconProps: witIconUrl && {
-                                    iconType: VssIconType.image,
+                                    iconType: 1, // VssIconType.Image
                                     imageProps: {
                                         src: witIconUrl,
                                         width: 16,
@@ -200,7 +200,7 @@ export class RuleGroupView extends BaseFluxComponent<IRuleGroupViewProps, IRuleG
                 name: "New Rule",
                 important: true,
                 disabled: this.state.loading || !this.state.ruleGroup,
-                iconProps: { iconName: "Add", iconType: VssIconType.fabric },
+                iconProps: { iconName: "Add", iconType: VssIconType.Fabric },
                 onClick: () => this._showRulePanel(null)
             },
             {
@@ -208,7 +208,7 @@ export class RuleGroupView extends BaseFluxComponent<IRuleGroupViewProps, IRuleG
                 name: "Refresh",
                 important: true,
                 disabled: this.state.loading || !this.state.ruleGroup,
-                iconProps: { iconName: "Refresh", iconType: VssIconType.fabric },
+                iconProps: { iconName: "Refresh", iconType: VssIconType.Fabric },
                 onClick: this._refresh
             }
         ];
@@ -220,7 +220,7 @@ export class RuleGroupView extends BaseFluxComponent<IRuleGroupViewProps, IRuleG
                     name: "Edit",
                     important: true,
                     disabled: this.state.loading || !this.state.ruleGroup,
-                    iconProps: { iconName: "Edit", iconType: VssIconType.fabric },
+                    iconProps: { iconName: "Edit", iconType: VssIconType.Fabric },
                     onClick: this._showEditGroupPanel
                 },
                 {
@@ -228,7 +228,7 @@ export class RuleGroupView extends BaseFluxComponent<IRuleGroupViewProps, IRuleG
                     name: "Delete",
                     important: true,
                     disabled: this.state.loading || !this.state.ruleGroup,
-                    iconProps: { iconName: "Delete", iconType: VssIconType.fabric, style: { color: "#da0a00" } },
+                    iconProps: { iconName: "Delete", iconType: VssIconType.Fabric, style: { color: "#da0a00" } },
                     onClick: this._deleteRuleGroup
                 }
             );
@@ -323,7 +323,7 @@ export class RuleGroupView extends BaseFluxComponent<IRuleGroupViewProps, IRuleG
                                 directionalHint={DirectionalHint.bottomCenter}
                             >
                                 <VssIcon
-                                    iconType={VssIconType.fabric}
+                                    iconType={VssIconType.Fabric}
                                     iconName={rule.disabled ? "CircleStopSolid" : "SkypeCheck"}
                                     className={css("rule-status", { disabled: rule.disabled })}
                                 />
@@ -331,7 +331,7 @@ export class RuleGroupView extends BaseFluxComponent<IRuleGroupViewProps, IRuleG
 
                             {rule.triggers.length > 0 && (
                                 <TooltipHost content="This rule has triggers" delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomCenter}>
-                                    <VssIcon className="rule-trigger-icon" iconType={VssIconType.fabric} iconName="LightningBolt" />
+                                    <VssIcon className="rule-trigger-icon" iconType={VssIconType.Fabric} iconName="LightningBolt" />
                                 </TooltipHost>
                             )}
                         </div>

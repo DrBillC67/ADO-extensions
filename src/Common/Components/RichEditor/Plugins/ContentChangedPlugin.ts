@@ -1,13 +1,15 @@
-import Editor from "roosterjs-editor-core/lib/editor/Editor";
-import EditorPlugin from "roosterjs-editor-core/lib/editor/EditorPlugin";
-import PluginEvent from "roosterjs-editor-types/lib/editor/PluginEvent";
-import PluginEventType from "roosterjs-editor-types/lib/editor/PluginEventType";
+import { PluginEvent, PluginEventType } from "roosterjs-editor-types";
+import { Editor, EditorPlugin } from "roosterjs-editor-core";
 
 /**
- * Paste plugin, handles onPaste event and paste content into editor
+ * Content Changed Plugin, handles content change events and triggers onChange callback
  */
 export class ContentChangedPlugin implements EditorPlugin {
     constructor(private _onChange: () => void) {}
+
+    public getName(): string {
+        return "ContentChangedPlugin";
+    }
 
     public initialize(_editor: Editor) {
         // no op

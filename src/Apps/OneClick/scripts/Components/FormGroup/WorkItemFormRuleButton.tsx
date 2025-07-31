@@ -48,7 +48,7 @@ export class WorkItemFormRuleButton extends BaseFluxComponent<IWorkItemFormRuleB
                     display: hideButton ? "none" : undefined
                 }}
             >
-                {rule.hasTriggers && <VssIcon iconName="LightningBolt" iconType={VssIconType.fabric} />}
+                {rule.hasTriggers && <VssIcon iconName="LightningBolt" iconType={VssIconType.Fabric} />}
                 <div className="rule-button-text">{name}</div>
             </div>
         );
