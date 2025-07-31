@@ -1,65 +1,68 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { MessageBar, MessageBarType } from '@fluentui/react';
-
-interface Props {
-    children: ReactNode;
-    fallback?: ReactNode;
-}
+import { MessageBar, MessageBarType, PrimaryButton, Stack, Text } from '@fluentui/react';
+import { ErrorBoundaryProps, ErrorFallbackProps } from './ErrorBoundary.types';
+import { DefaultErrorFallback } from './DefaultErrorFallback';
 
 interface State {
-    hasError: boolean;
-    error?: Error;
-    errorInfo?: ErrorInfo;
+  hasError: boolean;
+  error?: Error;
+  errorInfo?: ErrorInfo;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
-        this.state = { hasError: false };
-    }
+export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-    static getDerivedStateFromError(error: Error): State {
-        return { hasError: true, error };
-    }
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
+  }
 
-    componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        console.error('ErrorBoundary caught an error:', error, errorInfo);
-        this.setState({ error, errorInfo });
-    }
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    this.setState({ error, errorInfo });
+    
+    // Call the onError callback if provided
+    this.props.onError?.(error, errorInfo);
+  }
 
-    render() {
-        if (this.state.hasError) {
-            if (this.props.fallback) {
-                return this.props.fallback;
-            }
+  private resetError = () => {
+    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
+  };
 
-            return (
-                <MessageBar
-                    messageBarType={MessageBarType.error}
-                    isMultiline={true}
-                >
-                    <div>
-                        <h3>Something went wrong</h3>
-                        <p>An error occurred while rendering this component.</p>
-                        {process.env.NODE_ENV === 'development' && this.state.error && (
-                            <details style={{ whiteSpace: 'pre-wrap' }}>
-                                <summary>Error Details</summary>
-                                {this.state.error.toString()}
-                                {this.state.errorInfo && (
-                                    <div>
-                                        <br />
-                                        <strong>Component Stack:</strong>
-                                        <br />
-                                        {this.state.errorInfo.componentStack}
-                                    </div>
-                                )}
-                            </details>
-                        )}
-                    </div>
-                </MessageBar>
-            );
+  render() {
+    if (this.state.hasError) {
+      // If a custom fallback is provided, render it
+      if (this.props.fallback) {
+        if (typeof this.props.fallback === 'function') {
+          const FallbackComponent = this.props.fallback;
+          return (
+            <FallbackComponent
+              error={this.state.error!}
+              errorInfo={this.state.errorInfo}
+              resetError={this.resetError}
+              errorMessage={this.props.errorMessage}
+              errorTitle={this.props.errorTitle}
+            />
+          );
         }
+        return this.props.fallback;
+      }
 
-        return this.props.children;
+      // Default error UI
+      return (
+        <DefaultErrorFallback
+          error={this.state.error!}
+          errorInfo={this.state.errorInfo}
+          resetError={this.resetError}
+          errorMessage={this.props.errorMessage}
+          errorTitle={this.props.errorTitle}
+          showErrorDetails={this.props.showErrorDetails}
+        />
+      );
     }
+
+    return this.props.children;
+  }
 } 

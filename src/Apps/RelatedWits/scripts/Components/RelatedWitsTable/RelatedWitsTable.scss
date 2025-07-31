@@ -1,0 +1,219 @@
+.related-wits-table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--white);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.table-command-bar {
+  border-bottom: 1px solid var(--neutralLight);
+  background-color: var(--neutralLighter);
+  
+  .ms-CommandBar {
+    padding: 0 16px;
+  }
+}
+
+.loading-container {
+  padding: 40px;
+  min-height: 200px;
+}
+
+.work-items-details-list {
+  flex: 1;
+  overflow: auto;
+  
+  .ms-DetailsList {
+    .ms-DetailsList-contentWrapper {
+      .ms-DetailsList-content {
+        .ms-DetailsRow {
+          border-bottom: 1px solid var(--neutralLight);
+          transition: background-color 0.2s ease;
+          
+          &:hover {
+            background-color: var(--neutralLighter);
+          }
+          
+          &.ms-DetailsRow--selected {
+            background-color: var(--themeLighter);
+          }
+        }
+      }
+    }
+  }
+}
+
+.table-row {
+  cursor: pointer;
+  
+  &:hover {
+    background-color: var(--neutralLighter);
+  }
+}
+
+.work-item-id {
+  font-weight: 600;
+  color: var(--themePrimary);
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.work-item-type {
+  font-weight: 500;
+  color: var(--neutralPrimary);
+}
+
+.work-item-title {
+  font-weight: 500;
+  color: var(--neutralPrimary);
+  line-height: 1.4;
+  
+  &:hover {
+    color: var(--themePrimary);
+  }
+}
+
+.work-item-assigned-to {
+  color: var(--neutralPrimary);
+}
+
+.work-item-area-path {
+  color: var(--neutralSecondary);
+  font-size: 12px;
+}
+
+.work-item-state {
+  font-weight: 500;
+}
+
+.work-item-changed-date {
+  color: var(--neutralSecondary);
+  font-size: 12px;
+}
+
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+  
+  .empty-state-subtitle {
+    color: var(--neutralSecondary);
+    margin-top: 8px;
+  }
+}
+
+// Dark theme support
+.vss-dark {
+  .related-wits-table {
+    background-color: var(--neutralLighter);
+  }
+  
+  .table-command-bar {
+    background-color: var(--neutralQuaternary);
+    border-bottom-color: var(--neutralTertiary);
+  }
+  
+  .work-items-details-list {
+    .ms-DetailsList {
+      .ms-DetailsList-contentWrapper {
+        .ms-DetailsList-content {
+          .ms-DetailsRow {
+            border-bottom-color: var(--neutralTertiary);
+            
+            &:hover {
+              background-color: var(--neutralQuaternary);
+            }
+            
+            &.ms-DetailsRow--selected {
+              background-color: var(--themeDarkAlt);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  .table-row {
+    &:hover {
+      background-color: var(--neutralQuaternary);
+    }
+  }
+  
+  .work-item-area-path {
+    color: var(--neutralTertiary);
+  }
+  
+  .work-item-changed-date {
+    color: var(--neutralTertiary);
+  }
+  
+  .empty-state-subtitle {
+    color: var(--neutralTertiary);
+  }
+}
+
+// High contrast theme support
+.vss-high-contrast {
+  .related-wits-table {
+    border: 1px solid var(--neutralPrimary);
+  }
+  
+  .table-command-bar {
+    border-bottom: 1px solid var(--neutralPrimary);
+  }
+  
+  .work-items-details-list {
+    .ms-DetailsList {
+      .ms-DetailsList-contentWrapper {
+        .ms-DetailsList-content {
+          .ms-DetailsRow {
+            border-bottom: 1px solid var(--neutralPrimary);
+            
+            &:hover {
+              border: 1px solid var(--themePrimary);
+            }
+            
+            &.ms-DetailsRow--selected {
+              border: 2px solid var(--themePrimary);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .related-wits-table {
+    .table-command-bar {
+      .ms-CommandBar {
+        padding: 0 8px;
+      }
+    }
+  }
+  
+  .work-items-details-list {
+    .ms-DetailsList {
+      .ms-DetailsList-contentWrapper {
+        .ms-DetailsList-content {
+          .ms-DetailsRow {
+            padding: 8px;
+          }
+        }
+      }
+    }
+  }
+  
+  .work-item-title {
+    font-size: 14px;
+  }
+  
+  .work-item-area-path,
+  .work-item-changed-date {
+    font-size: 11px;
+  }
+} 

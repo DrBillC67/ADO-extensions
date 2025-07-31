@@ -1,0 +1,281 @@
+@import "../../../css/variables";
+
+.configure-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  padding: 24px;
+
+  // Dialog Header
+  .dialog-header {
+    margin-bottom: 16px;
+
+    .dialog-title {
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 8px;
+    }
+
+    .dialog-description {
+      color: var(--secondary-text-color);
+      line-height: 1.4;
+    }
+  }
+
+  // Work Item Types List
+  .work-item-types-list {
+    flex: 1;
+    overflow: auto;
+    margin-bottom: 16px;
+
+    .work-item-type-checkbox {
+      .ms-Checkbox {
+        .ms-Checkbox-checkbox {
+          border-color: var(--border-color);
+          background-color: var(--background-color);
+
+          &:hover {
+            border-color: var(--hover-color);
+          }
+
+          &.is-checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+
+            &:hover {
+              background-color: var(--primary-hover-color);
+              border-color: var(--primary-hover-color);
+            }
+          }
+
+          &.is-disabled {
+            background-color: var(--disabled-color);
+            border-color: var(--disabled-border-color);
+            opacity: 0.6;
+          }
+        }
+
+        .ms-Checkbox-text {
+          color: var(--text-color);
+          font-weight: 500;
+
+          &:hover {
+            color: var(--hover-text-color);
+          }
+        }
+
+        &.is-disabled {
+          .ms-Checkbox-text {
+            color: var(--disabled-text-color);
+          }
+        }
+      }
+    }
+  }
+
+  // Dialog Footer
+  .dialog-footer {
+    border-top: 1px solid var(--border-color);
+    padding-top: 16px;
+
+    .ms-Button {
+      border-radius: 4px;
+      font-weight: 500;
+
+      &.ms-Button--primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+
+        &:hover {
+          background-color: var(--primary-hover-color);
+          border-color: var(--primary-hover-color);
+        }
+
+        &:disabled {
+          background-color: var(--disabled-color);
+          border-color: var(--disabled-border-color);
+          color: var(--disabled-text-color);
+        }
+      }
+
+      &.ms-Button--default {
+        background-color: var(--background-color);
+        border-color: var(--border-color);
+        color: var(--text-color);
+
+        &:hover {
+          background-color: var(--hover-color);
+          border-color: var(--hover-border-color);
+        }
+
+        &:disabled {
+          background-color: var(--disabled-color);
+          border-color: var(--disabled-border-color);
+          color: var(--disabled-text-color);
+        }
+      }
+    }
+  }
+
+  // Error Details
+  .error-details {
+    margin-top: 8px;
+    color: var(--error-color);
+    font-family: var(--monospace-font);
+    font-size: 12px;
+    background-color: var(--error-background);
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--error-border-color);
+  }
+}
+
+// Theme support
+[data-theme="dark"] {
+  .configure-dialog {
+    --background-color: #1f1f1f;
+    --text-color: #ffffff;
+    --secondary-text-color: #cccccc;
+    --border-color: #404040;
+    --hover-color: #404040;
+    --hover-border-color: #505050;
+    --hover-text-color: #ffffff;
+    --primary-color: #0078d4;
+    --primary-hover-color: #106ebe;
+    --disabled-color: #2d2d2d;
+    --disabled-border-color: #333333;
+    --disabled-text-color: #666666;
+    --error-color: #f1707b;
+    --error-background: rgba(241, 112, 123, 0.1);
+    --error-border-color: #f1707b;
+  }
+}
+
+[data-theme="highContrast"] {
+  .configure-dialog {
+    --background-color: #000000;
+    --text-color: #ffffff;
+    --secondary-text-color: #ffffff;
+    --border-color: #ffffff;
+    --hover-color: #ffff00;
+    --hover-border-color: #ffff00;
+    --hover-text-color: #000000;
+    --primary-color: #ffff00;
+    --primary-hover-color: #ffff00;
+    --disabled-color: #000000;
+    --disabled-border-color: #666666;
+    --disabled-text-color: #666666;
+    --error-color: #ff0000;
+    --error-background: #000000;
+    --error-border-color: #ff0000;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .configure-dialog {
+    padding: 16px;
+
+    .dialog-header {
+      .dialog-title {
+        font-size: 18px;
+      }
+
+      .dialog-description {
+        font-size: 14px;
+      }
+    }
+
+    .work-item-types-list {
+      .work-item-type-checkbox {
+        .ms-Checkbox {
+          .ms-Checkbox-text {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .configure-dialog {
+    padding: 12px;
+
+    .dialog-header {
+      .dialog-title {
+        font-size: 16px;
+      }
+
+      .dialog-description {
+        font-size: 12px;
+      }
+    }
+
+    .work-item-types-list {
+      .work-item-type-checkbox {
+        .ms-Checkbox {
+          .ms-Checkbox-text {
+            font-size: 12px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animation support
+@media (prefers-reduced-motion: no-preference) {
+  .configure-dialog {
+    .work-item-types-list {
+      .work-item-type-checkbox {
+        .ms-Checkbox {
+          .ms-Checkbox-checkbox {
+            transition: all 0.2s ease-in-out;
+          }
+
+          .ms-Checkbox-text {
+            transition: color 0.2s ease-in-out;
+          }
+        }
+      }
+    }
+
+    .dialog-footer {
+      .ms-Button {
+        transition: all 0.2s ease-in-out;
+      }
+    }
+  }
+}
+
+// Focus styles for accessibility
+.configure-dialog {
+  .work-item-types-list {
+    .work-item-type-checkbox {
+      .ms-Checkbox:focus-visible {
+        outline: 2px solid var(--focus-color);
+        outline-offset: 2px;
+      }
+    }
+  }
+
+  .dialog-footer {
+    .ms-Button:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 2px;
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .configure-dialog {
+    .dialog-footer {
+      display: none;
+    }
+  }
+} 

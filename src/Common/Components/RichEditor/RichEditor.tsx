@@ -1,204 +1,237 @@
-import "./RichEditor.scss";
+import * as React from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Stack, Text, MessageBar, MessageBarType } from '@fluentui/react';
+import { InfoLabel } from '../InfoLabel';
+import { InputError } from '../InputError';
+import { RichEditorToolbar } from './Toolbar/RichEditorToolbar';
+import { ALL_BUTTONS, RichEditorToolbarButtonNames } from './Toolbar/RichEditorToolbarButtonNames';
+import { ContentChangedPlugin } from './Plugins/ContentChangedPlugin';
+import { Paste } from './Plugins/Paste';
+import { RichEditorProps, EditorOptions } from './RichEditor.types';
+import { useRichEditor } from './hooks/useRichEditor';
+import './RichEditor.scss';
 
-import * as React from "react";
+export const RichEditor: React.FC<RichEditorProps> = ({
+  value = '',
+  delay = 300,
+  label,
+  info,
+  error,
+  disabled = false,
+  required = false,
+  editorOptions,
+  onChange,
+  className,
+  ...props
+}) => {
+  const contentDivRef = useRef<HTMLDivElement>(null);
+  const [internalValue, setInternalValue] = useState(value);
+  const [isFocused, setIsFocused] = useState(false);
 
-import { InfoLabel } from "Common/Components/InfoLabel";
-import { InputError } from "Common/Components/InputError";
-import { IFocussable } from "Common/Components/Interfaces";
-import { ContentChangedPlugin } from "Common/Components/RichEditor/Plugins/ContentChangedPlugin";
-import { Paste } from "Common/Components/RichEditor/Plugins/Paste";
-import { RichEditorToolbar } from "Common/Components/RichEditor/Toolbar/RichEditorToolbar";
-import {
-    ALL_BUTTONS, RichEditorToolbarButtonNames
-} from "Common/Components/RichEditor/Toolbar/RichEditorToolbarButtonNames";
-import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
-import { delay, DelayedFunction } from "Common/Utilities/Core";
-import { isNullOrEmpty } from "Common/Utilities/String";
-import { css } from "OfficeFabric/Utilities";
-import { Editor, IEditorOptions as EditorOptions, EditorPlugin } from "roosterjs-editor-core";
-import { ContentEdit, HyperLink } from "roosterjs-editor-plugins";
+  const {
+    editor,
+    isEditorReady,
+    editorError,
+    initializeEditor,
+    disposeEditor,
+    setContent,
+    focus: focusEditor
+  } = useRichEditor(contentDivRef, {
+    initialContent: value,
+    plugins: useMemo(() => {
+      const plugins = [
+        new ContentChangedPlugin((newValue: string) => {
+          setInternalValue(newValue);
+          onChange(newValue);
+        })
+      ];
 
-export interface IRichEditorProps extends IBaseFluxComponentProps {
-    value?: string;
-    delay?: number;
-    label?: string;
-    info?: string;
-    error?: string;
-    disabled?: boolean;
-    required?: boolean;
-    editorOptions?: IEditorOptions;
-    onChange(newValue: string): void;
-}
+      if (editorOptions?.getPastedImageUrl) {
+        plugins.push(new Paste(editorOptions.getPastedImageUrl));
+      }
 
-export interface IRichEditorState extends IBaseFluxComponentState {
-    value?: string;
-}
+      return plugins;
+    }, [onChange, editorOptions?.getPastedImageUrl]),
+    disabled
+  });
 
-export interface IEditorOptions {
-    buttons?: RichEditorToolbarButtonNames[];
-    getPastedImageUrl?(value: string): Promise<string>;
-}
-
-export class RichEditor extends BaseFluxComponent<IRichEditorProps, IRichEditorState> implements IFocussable {
-    private _contentDiv: HTMLDivElement;
-    private _delayedFunction: DelayedFunction;
-    private _editor: Editor;
-
-    public focus() {
-        if (this._editor) {
-            this._editor.focus();
-        }
+  // Initialize editor on mount
+  useEffect(() => {
+    if (contentDivRef.current && !editor) {
+      initializeEditor();
     }
 
-    public componentDidMount() {
-        super.componentDidMount();
-        const plugins: EditorPlugin[] = [
-            new ContentEdit() as any,
-            new HyperLink() as any,
-            new ContentChangedPlugin(this._onChange)
-        ];
-        if (this.props.editorOptions && this.props.editorOptions.getPastedImageUrl) {
-            plugins.push(new Paste(this._getImageUrl));
-        }
+    return () => {
+      if (editor) {
+        disposeEditor();
+      }
+    };
+  }, [editor, initializeEditor, disposeEditor]);
 
-        const options: EditorOptions = {
-            plugins: plugins,
-            initialContent: this.state.value
+  // Update content when value prop changes
+  useEffect(() => {
+    if (editor && isEditorReady && value !== internalValue) {
+      setContent(value);
+      setInternalValue(value);
+    }
+  }, [editor, isEditorReady, value, internalValue, setContent]);
+
+  // Handle disabled state changes
+  useEffect(() => {
+    if (contentDivRef.current) {
+      contentDivRef.current.setAttribute('contenteditable', (!disabled).toString());
+    }
+  }, [disabled]);
+
+  // Debounced change handler
+  const debouncedOnChange = useCallback(
+    React.useMemo(
+      () => {
+        let timeoutId: NodeJS.Timeout;
+        return (newValue: string) => {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            onChange(newValue);
+          }, delay);
         };
-        this._editor = new Editor(this._contentDiv, options);
+      },
+      [onChange, delay]
+    ),
+    [onChange, delay]
+  );
 
-        if (this.props.disabled) {
-            this._contentDiv.setAttribute("contenteditable", "false");
-        }
+  // Focus handler
+  const handleFocus = useCallback(() => {
+    setIsFocused(true);
+    focusEditor();
+  }, [focusEditor]);
+
+  const handleBlur = useCallback(() => {
+    setIsFocused(false);
+  }, []);
+
+  // Toolbar action handlers
+  const handleToolbarAction = useCallback((action: string) => {
+    if (editor && isEditorReady) {
+      switch (action) {
+        case 'bold':
+          editor.execCommand('bold');
+          break;
+        case 'italic':
+          editor.execCommand('italic');
+          break;
+        case 'underline':
+          editor.execCommand('underline');
+          break;
+        case 'insertLink':
+          const url = prompt('Enter URL:');
+          if (url) {
+            editor.execCommand('createLink', url);
+          }
+          break;
+        case 'insertImage':
+          const imageUrl = prompt('Enter image URL:');
+          if (imageUrl) {
+            editor.execCommand('insertImage', imageUrl);
+          }
+          break;
+        default:
+          console.warn(`Unknown toolbar action: ${action}`);
+      }
+    }
+  }, [editor, isEditorReady]);
+
+  // Render toolbar
+  const renderToolbar = useMemo(() => {
+    if (!editorOptions?.buttons || editorOptions.buttons.length === 0) {
+      return null;
     }
 
-    public componentWillUnmount() {
-        super.componentWillUnmount();
-        this._editor.dispose();
-        this._disposeDelayedFunction();
+    return (
+      <RichEditorToolbar
+        buttons={editorOptions.buttons}
+        onAction={handleToolbarAction}
+        disabled={disabled}
+        className="rich-editor-toolbar"
+      />
+    );
+  }, [editorOptions?.buttons, handleToolbarAction, disabled]);
+
+  // Render error message
+  const renderError = useMemo(() => {
+    if (error || editorError) {
+      return (
+        <InputError
+          error={error || editorError}
+          className="rich-editor-error"
+        />
+      );
     }
+    return null;
+  }, [error, editorError]);
 
-    public componentWillReceiveProps(nextProps: IRichEditorProps, context?: any) {
-        super.componentWillReceiveProps(nextProps, context);
-        this._disposeDelayedFunction();
+  return (
+    <div className={`rich-editor-container ${className || ''}`} {...props}>
+      <Stack gap={8}>
+        {/* Label */}
+        {label && (
+          <Text variant="medium" className="rich-editor-label">
+            {label}
+            {required && <span className="required-indicator">*</span>}
+          </Text>
+        )}
 
-        if (nextProps.value !== this.state.value) {
-            this._editor.setContent(nextProps.value || "");
-            this.setState({
-                value: nextProps.value
-            });
-        }
+        {/* Info */}
+        {info && (
+          <InfoLabel
+            info={info}
+            className="rich-editor-info"
+          />
+        )}
 
-        if (nextProps.disabled !== this.props.disabled) {
-            if (nextProps.disabled) {
-                this._contentDiv.setAttribute("contenteditable", "false");
-            } else {
-                this._contentDiv.setAttribute("contenteditable", "true");
-            }
-        }
-    }
+        {/* Editor Container */}
+        <div 
+          className={`rich-editor-wrapper ${isFocused ? 'focused' : ''} ${disabled ? 'disabled' : ''}`}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+        >
+          {/* Toolbar */}
+          {renderToolbar}
 
-    public render() {
-        const error = this.props.error || this._getDefaultError();
+          {/* Content Area */}
+          <div
+            ref={contentDivRef}
+            className="rich-editor-content"
+            role="textbox"
+            aria-label={label}
+            aria-required={required}
+            aria-invalid={!!error}
+            aria-describedby={error ? 'rich-editor-error' : undefined}
+          />
 
-        return (
-            <div className={css("rich-editor-container", this.props.className)}>
-                {this.props.label && <InfoLabel className="rich-editor-label" label={this.props.label} info={this.props.info} />}
-                <div className="progress-bar" style={{ visibility: this.state.loading ? "visible" : "hidden" }} />
-                {this._renderToolbar()}
-                <div className="rich-editor" ref={this._onContentDivRef} />
-                <div className="rich-editor-dialog-container" />
-                {error && <InputError className="rich-editor-error" error={error} />}
+          {/* Loading State */}
+          {!isEditorReady && (
+            <div className="rich-editor-loading">
+              <Text variant="small">Initializing editor...</Text>
             </div>
-        );
-    }
+          )}
+        </div>
 
-    protected getInitialState(props: IRichEditorProps): IRichEditorState {
-        return {
-            value: props.value || ""
-        };
-    }
+        {/* Error Message */}
+        {renderError}
 
-    private _renderToolbar(): JSX.Element {
-        let buttons = (this.props.editorOptions && this.props.editorOptions.buttons) || ALL_BUTTONS;
-        if (!this.props.editorOptions || !this.props.editorOptions.getPastedImageUrl) {
-            buttons = buttons.filter(b => b !== RichEditorToolbarButtonNames.btnUploadImage);
-        }
-
-        if (buttons.length > 0) {
-            return (
-                <RichEditorToolbar
-                    buttons={buttons}
-                    getEditor={this._getEditor}
-                    options={{
-                        getImageUrl: this._getImageUrl
-                    }}
-                />
-            );
-        }
-        return null;
-    }
-
-    private _getDefaultError(): string {
-        if (this.props.required && isNullOrEmpty(this.state.value)) {
-            return "A value is required";
-        }
-    }
-
-    private _disposeDelayedFunction() {
-        if (this._delayedFunction) {
-            this._delayedFunction.cancel();
-            this._delayedFunction = null;
-        }
-    }
-
-    private _getEditor = (): Editor => {
-        return this._editor;
-    };
-
-    private _onContentDivRef = (ref: HTMLDivElement) => {
-        this._contentDiv = ref;
-    };
-
-    private _onChange = () => {
-        this._disposeDelayedFunction();
-
-        if (this.props.delay == null) {
-            this._fireChange();
-        } else {
-            this._delayedFunction = delay(this, this.props.delay, () => {
-                this._fireChange();
-            });
-        }
-    };
-
-    private _fireChange = () => {
-        this._disposeDelayedFunction();
-
-        const value = this._editor.getContent();
-        if (value !== this.state.value) {
-            this.setState({ value: value }, () => {
-                this.props.onChange(value);
-            });
-        }
-    };
-
-    private _getImageUrl = async (data: string): Promise<string> => {
-        if (!this.props.editorOptions || !this.props.editorOptions.getPastedImageUrl) {
-            return null;
-        }
-
-        this.setState({ loading: true });
-
-        try {
-            const imageUrl = await this.props.editorOptions.getPastedImageUrl(data);
-            this.setState({ loading: false });
-            return imageUrl;
-        } catch (e) {
-            this.setState({ loading: false });
-            return null;
-        }
-    };
-}
+        {/* Editor Error */}
+        {editorError && (
+          <MessageBar
+            messageBarType={MessageBarType.error}
+            className="rich-editor-error-message"
+          >
+            <Text variant="small">
+              Failed to initialize rich text editor. Please refresh the page and try again.
+            </Text>
+          </MessageBar>
+        )}
+      </Stack>
+    </div>
+  );
+};

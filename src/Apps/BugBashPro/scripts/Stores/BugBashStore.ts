@@ -1,206 +1,477 @@
-import { BugBashActionsHub } from "BugBashPro/Actions/ActionsHub";
-import { IBugBash, ISortState } from "BugBashPro/Interfaces";
-import { BugBash } from "BugBashPro/ViewModels/BugBash";
-import { BaseStore } from "Common/Flux/Stores/BaseStore";
-import { findIndex } from "Common/Utilities/Array";
-import { stringEquals } from "Common/Utilities/String";
-import { IFilterState } from "VSSUI/Utilities/Filter";
+import { create } from 'zustand';
+import { devtools, subscribeWithSelector } from 'zustand/middleware';
+import { BugBashState, BugBashActions, BugBash, BugBashItem, BugBashFilter, BugBashAnalytics, UserSettings, BugBashFormData, BugBashSettingsFormData } from '../types/BugBashPro.types';
+import { BugBashDataService } from '../DataServices/BugBashDataService';
+import { BugBashItemDataService } from '../DataServices/BugBashItemDataService';
+import { BugBashSettingsDataService } from '../DataServices/BugBashSettingsDataService';
 
-export class BugBashStore extends BaseStore<BugBash[], BugBash, string> {
-    private _allLoaded: boolean;
-    private _itemsIdMap: IDictionaryStringTo<BugBash>;
-    private _filteredItems: BugBash[];
-    private _filterState: IFilterState;
-    private _sortState: ISortState;
-    private _newBugBash: BugBash;
+// Initial state
+const initialState: BugBashState = {
+  bugBashes: [],
+  currentBugBash: undefined,
+  bugBashItems: [],
+  currentBugBashItem: undefined,
+  loading: false,
+  error: null,
+  filters: {},
+  analytics: undefined,
+  userSettings: undefined
+};
 
-    public get filterState(): IFilterState {
-        return this._filterState;
-    }
+// Create the store
+export const useBugBashStore = create<BugBashState & BugBashActions>()(
+  devtools(
+    subscribeWithSelector((set, get) => ({
+      ...initialState,
 
-    public get sortState(): ISortState {
-        return this._sortState;
-    }
-
-    constructor() {
-        super();
-        this._allLoaded = false;
-        this._itemsIdMap = {};
-        this._newBugBash = new BugBash();
-    }
-
-    public isLoaded(key?: string): boolean {
-        if (key) {
-            return super.isLoaded();
+      // Bug Bash Actions
+      loadBugBashes: async () => {
+        set({ loading: true, error: null });
+        try {
+          const bugBashes = await BugBashDataService.getBugBashes();
+          set({ bugBashes, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to load bug bashes', 
+            loading: false 
+          });
         }
+      },
 
-        return this._allLoaded && super.isLoaded();
+      loadBugBash: async (id: string) => {
+        set({ loading: true, error: null });
+        try {
+          const bugBash = await BugBashDataService.getBugBash(id);
+          set({ currentBugBash: bugBash, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to load bug bash', 
+            loading: false 
+          });
+        }
+      },
+
+      createBugBash: async (data: BugBashSettingsFormData) => {
+        set({ loading: true, error: null });
+        try {
+          const bugBash = await BugBashDataService.createBugBash(data);
+          set(state => ({
+            bugBashes: [...state.bugBashes, bugBash],
+            currentBugBash: bugBash,
+            loading: false
+          }));
+          return bugBash;
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to create bug bash', 
+            loading: false 
+          });
+          throw error;
+        }
+      },
+
+      updateBugBash: async (id: string, data: Partial<BugBash>) => {
+        set({ loading: true, error: null });
+        try {
+          await BugBashDataService.updateBugBash(id, data);
+          set(state => ({
+            bugBashes: state.bugBashes.map(bb => 
+              bb.id === id ? { ...bb, ...data } : bb
+            ),
+            currentBugBash: state.currentBugBash?.id === id 
+              ? { ...state.currentBugBash, ...data }
+              : state.currentBugBash,
+            loading: false
+          }));
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to update bug bash', 
+            loading: false 
+          });
+        }
+      },
+
+      deleteBugBash: async (id: string) => {
+        set({ loading: true, error: null });
+        try {
+          await BugBashDataService.deleteBugBash(id);
+          set(state => ({
+            bugBashes: state.bugBashes.filter(bb => bb.id !== id),
+            currentBugBash: state.currentBugBash?.id === id ? undefined : state.currentBugBash,
+            loading: false
+          }));
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to delete bug bash', 
+            loading: false 
+          });
+        }
+      },
+
+      // Bug Bash Item Actions
+      loadBugBashItems: async (bugBashId: string, filters?: BugBashFilter) => {
+        set({ loading: true, error: null });
+        try {
+          const items = await BugBashItemDataService.getBugBashItems(bugBashId, filters);
+          set({ bugBashItems: items, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to load bug bash items', 
+            loading: false 
+          });
+        }
+      },
+
+      loadBugBashItem: async (id: string) => {
+        set({ loading: true, error: null });
+        try {
+          const item = await BugBashItemDataService.getBugBashItem(id);
+          set({ currentBugBashItem: item, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to load bug bash item', 
+            loading: false 
+          });
+        }
+      },
+
+      createBugBashItem: async (bugBashId: string, data: BugBashFormData) => {
+        set({ loading: true, error: null });
+        try {
+          const item = await BugBashItemDataService.createBugBashItem(bugBashId, data);
+          set(state => ({
+            bugBashItems: [...state.bugBashItems, item],
+            loading: false
+          }));
+          return item;
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to create bug bash item', 
+            loading: false 
+          });
+          throw error;
+        }
+      },
+
+      updateBugBashItem: async (id: string, data: Partial<BugBashItem>) => {
+        set({ loading: true, error: null });
+        try {
+          await BugBashItemDataService.updateBugBashItem(id, data);
+          set(state => ({
+            bugBashItems: state.bugBashItems.map(item => 
+              item.id === id ? { ...item, ...data } : item
+            ),
+            currentBugBashItem: state.currentBugBashItem?.id === id 
+              ? { ...state.currentBugBashItem, ...data }
+              : state.currentBugBashItem,
+            loading: false
+          }));
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to update bug bash item', 
+            loading: false 
+          });
+        }
+      },
+
+      deleteBugBashItem: async (id: string) => {
+        set({ loading: true, error: null });
+        try {
+          await BugBashItemDataService.deleteBugBashItem(id);
+          set(state => ({
+            bugBashItems: state.bugBashItems.filter(item => item.id !== id),
+            currentBugBashItem: state.currentBugBashItem?.id === id ? undefined : state.currentBugBashItem,
+            loading: false
+          }));
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to delete bug bash item', 
+            loading: false 
+          });
+        }
+      },
+
+      approveBugBashItem: async (id: string) => {
+        set({ loading: true, error: null });
+        try {
+          await BugBashItemDataService.approveBugBashItem(id);
+          set(state => ({
+            bugBashItems: state.bugBashItems.map(item => 
+              item.id === id ? { ...item, status: 'approved' as const } : item
+            ),
+            currentBugBashItem: state.currentBugBashItem?.id === id 
+              ? { ...state.currentBugBashItem, status: 'approved' as const }
+              : state.currentBugBashItem,
+            loading: false
+          }));
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to approve bug bash item', 
+            loading: false 
+          });
+        }
+      },
+
+      rejectBugBashItem: async (id: string, reason?: string) => {
+        set({ loading: true, error: null });
+        try {
+          await BugBashItemDataService.rejectBugBashItem(id, reason);
+          set(state => ({
+            bugBashItems: state.bugBashItems.map(item => 
+              item.id === id ? { ...item, status: 'rejected' as const } : item
+            ),
+            currentBugBashItem: state.currentBugBashItem?.id === id 
+              ? { ...state.currentBugBashItem, status: 'rejected' as const }
+              : state.currentBugBashItem,
+            loading: false
+          }));
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to reject bug bash item', 
+            loading: false 
+          });
+        }
+      },
+
+      createWorkItem: async (bugBashItemId: string, workItemType: string) => {
+        set({ loading: true, error: null });
+        try {
+          const workItem = await BugBashItemDataService.createWorkItem(bugBashItemId, workItemType);
+          set(state => ({
+            bugBashItems: state.bugBashItems.map(item => 
+              item.id === bugBashItemId ? { ...item, workItem, workItemId: workItem.id } : item
+            ),
+            currentBugBashItem: state.currentBugBashItem?.id === bugBashItemId 
+              ? { ...state.currentBugBashItem, workItem, workItemId: workItem.id }
+              : state.currentBugBashItem,
+            loading: false
+          }));
+          return workItem;
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to create work item', 
+            loading: false 
+          });
+          throw error;
+        }
+      },
+
+      linkWorkItem: async (bugBashItemId: string, workItemId: number) => {
+        set({ loading: true, error: null });
+        try {
+          await BugBashItemDataService.linkWorkItem(bugBashItemId, workItemId);
+          set(state => ({
+            bugBashItems: state.bugBashItems.map(item => 
+              item.id === bugBashItemId ? { ...item, workItemId } : item
+            ),
+            currentBugBashItem: state.currentBugBashItem?.id === bugBashItemId 
+              ? { ...state.currentBugBashItem, workItemId }
+              : state.currentBugBashItem,
+            loading: false
+          }));
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to link work item', 
+            loading: false 
+          });
+        }
+      },
+
+      // Comment Actions
+      addComment: async (bugBashItemId: string, content: string) => {
+        set({ loading: true, error: null });
+        try {
+          const comment = await BugBashItemDataService.addComment(bugBashItemId, content);
+          set(state => ({
+            bugBashItems: state.bugBashItems.map(item => 
+              item.id === bugBashItemId 
+                ? { ...item, comments: [...item.comments, comment] }
+                : item
+            ),
+            currentBugBashItem: state.currentBugBashItem?.id === bugBashItemId 
+              ? { ...state.currentBugBashItem, comments: [...state.currentBugBashItem.comments, comment] }
+              : state.currentBugBashItem,
+            loading: false
+          }));
+          return comment;
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to add comment', 
+            loading: false 
+          });
+          throw error;
+        }
+      },
+
+      updateComment: async (commentId: string, content: string) => {
+        set({ loading: true, error: null });
+        try {
+          await BugBashItemDataService.updateComment(commentId, content);
+          set(state => ({
+            bugBashItems: state.bugBashItems.map(item => ({
+              ...item,
+              comments: item.comments.map(comment => 
+                comment.id === commentId 
+                  ? { ...comment, content, isEdited: true, modifiedDate: new Date() }
+                  : comment
+              )
+            })),
+            currentBugBashItem: state.currentBugBashItem ? {
+              ...state.currentBugBashItem,
+              comments: state.currentBugBashItem.comments.map(comment => 
+                comment.id === commentId 
+                  ? { ...comment, content, isEdited: true, modifiedDate: new Date() }
+                  : comment
+              )
+            } : undefined,
+            loading: false
+          }));
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to update comment', 
+            loading: false 
+          });
+        }
+      },
+
+      deleteComment: async (commentId: string) => {
+        set({ loading: true, error: null });
+        try {
+          await BugBashItemDataService.deleteComment(commentId);
+          set(state => ({
+            bugBashItems: state.bugBashItems.map(item => ({
+              ...item,
+              comments: item.comments.filter(comment => comment.id !== commentId)
+            })),
+            currentBugBashItem: state.currentBugBashItem ? {
+              ...state.currentBugBashItem,
+              comments: state.currentBugBashItem.comments.filter(comment => comment.id !== commentId)
+            } : undefined,
+            loading: false
+          }));
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to delete comment', 
+            loading: false 
+          });
+        }
+      },
+
+      // Attachment Actions
+      uploadAttachment: async (bugBashItemId: string, file: File) => {
+        set({ loading: true, error: null });
+        try {
+          const attachment = await BugBashItemDataService.uploadAttachment(bugBashItemId, file);
+          set(state => ({
+            bugBashItems: state.bugBashItems.map(item => 
+              item.id === bugBashItemId 
+                ? { ...item, attachments: [...item.attachments, attachment] }
+                : item
+            ),
+            currentBugBashItem: state.currentBugBashItem?.id === bugBashItemId 
+              ? { ...state.currentBugBashItem, attachments: [...state.currentBugBashItem.attachments, attachment] }
+              : state.currentBugBashItem,
+            loading: false
+          }));
+          return attachment;
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to upload attachment', 
+            loading: false 
+          });
+          throw error;
+        }
+      },
+
+      deleteAttachment: async (attachmentId: string) => {
+        set({ loading: true, error: null });
+        try {
+          await BugBashItemDataService.deleteAttachment(attachmentId);
+          set(state => ({
+            bugBashItems: state.bugBashItems.map(item => ({
+              ...item,
+              attachments: item.attachments.filter(attachment => attachment.id !== attachmentId)
+            })),
+            currentBugBashItem: state.currentBugBashItem ? {
+              ...state.currentBugBashItem,
+              attachments: state.currentBugBashItem.attachments.filter(attachment => attachment.id !== attachmentId)
+            } : undefined,
+            loading: false
+          }));
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to delete attachment', 
+            loading: false 
+          });
+        }
+      },
+
+      // Analytics Actions
+      loadAnalytics: async (bugBashId: string) => {
+        set({ loading: true, error: null });
+        try {
+          const analytics = await BugBashDataService.getAnalytics(bugBashId);
+          set({ analytics, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to load analytics', 
+            loading: false 
+          });
+        }
+      },
+
+      // Filter Actions
+      updateFilters: (filters: Partial<BugBashFilter>) => {
+        set(state => ({
+          filters: { ...state.filters, ...filters }
+        }));
+      },
+
+      clearFilters: () => {
+        set({ filters: {} });
+      },
+
+      // User Settings Actions
+      loadUserSettings: async () => {
+        set({ loading: true, error: null });
+        try {
+          const settings = await BugBashSettingsDataService.getUserSettings();
+          set({ userSettings: settings, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to load user settings', 
+            loading: false 
+          });
+        }
+      },
+
+      updateUserSettings: async (settings: Partial<UserSettings>) => {
+        set({ loading: true, error: null });
+        try {
+          const updatedSettings = await BugBashSettingsDataService.updateUserSettings(settings);
+          set({ userSettings: updatedSettings, loading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to update user settings', 
+            loading: false 
+          });
+        }
+      }
+    })),
+    {
+      name: 'bugBashStore',
+      enabled: process.env.NODE_ENV === 'development'
     }
+  )
+);
 
-    public getNewBugBash(): BugBash {
-        return this._newBugBash;
-    }
-
-    public getItem(id: string): BugBash {
-        return this._itemsIdMap[id.toLowerCase()];
-    }
-
-    public getFilteredItems(): BugBash[] {
-        return this._filteredItems;
-    }
-
-    public getKey(): string {
-        return "BugBashStore";
-    }
-
-    protected initializeActionListeners() {
-        BugBashActionsHub.FireStoreChange.addListener(() => {
-            this.emitChanged();
-        });
-
-        BugBashActionsHub.ApplyFilter.addListener((filterState: IFilterState) => {
-            this._filterState = filterState;
-            this._filteredItems = this._applyFilterAndSort(this.items);
-            this.emitChanged();
-        });
-
-        BugBashActionsHub.ClearSortAndFilter.addListener(() => {
-            this._filterState = null;
-            this._sortState = null;
-            this._filteredItems = this.items ? [...this.items] : null;
-            this.emitChanged();
-        });
-
-        BugBashActionsHub.ApplySort.addListener((sortState: ISortState) => {
-            this._sortState = sortState;
-            this._filteredItems = this._applyFilterAndSort(this.items);
-            this.emitChanged();
-        });
-
-        BugBashActionsHub.Clean.addListener(() => {
-            const items = this.items || [];
-            for (const item of items) {
-                item.reset(false);
-            }
-
-            this._newBugBash.reset(false);
-
-            this._filterState = null;
-            this._sortState = null;
-            this._filteredItems = this.items ? [...this.items] : null;
-            this.emitChanged();
-        });
-
-        BugBashActionsHub.InitializeAllBugBashes.addListener((bugBashModels: IBugBash[]) => {
-            this._refreshBugBashes(bugBashModels);
-            this._allLoaded = true;
-            this.emitChanged();
-        });
-
-        BugBashActionsHub.InitializeBugBash.addListener((bugBashModel: IBugBash) => {
-            this._addOrUpdateBugBash(bugBashModel);
-            this.emitChanged();
-        });
-
-        BugBashActionsHub.CreateBugBash.addListener((bugBashModel: IBugBash) => {
-            this._newBugBash.reset(false);
-            this._addOrUpdateBugBash(bugBashModel);
-            this.emitChanged();
-        });
-
-        BugBashActionsHub.UpdateBugBash.addListener((bugBashModel: IBugBash) => {
-            this._addOrUpdateBugBash(bugBashModel);
-            this.emitChanged();
-        });
-
-        BugBashActionsHub.DeleteBugBash.addListener((bugBashId: string) => {
-            this._removeBugBash(bugBashId);
-            this.emitChanged();
-        });
-    }
-
-    protected convertItemKeyToString(key: string): string {
-        return key;
-    }
-
-    private _applyFilterAndSort(bugBashes: BugBash[]): BugBash[] {
-        if (bugBashes == null) {
-            return null;
-        }
-
-        let filteredItems = [...bugBashes];
-        if (this._filterState) {
-            filteredItems = this.items.filter(b => b.matches(this._filterState));
-        }
-
-        if (this._sortState) {
-            filteredItems.sort((b1, b2) => BugBash.compare(b1, b2, this._sortState));
-        }
-
-        return filteredItems;
-    }
-
-    private _refreshBugBashes(bugBashModels: IBugBash[]) {
-        if (!bugBashModels) {
-            return;
-        }
-
-        this.items = [];
-        this._filteredItems = [];
-        this._itemsIdMap = {};
-
-        for (const bugBashModel of bugBashModels) {
-            const bugBash = new BugBash(bugBashModel);
-            this.items.push(bugBash);
-            this._itemsIdMap[bugBashModel.id.toLowerCase()] = bugBash;
-        }
-
-        this._filteredItems = this._applyFilterAndSort(this.items);
-    }
-
-    private _addOrUpdateBugBash(bugBashModel: IBugBash) {
-        if (!bugBashModel) {
-            return;
-        }
-
-        if (this.items == null) {
-            this.items = [];
-        }
-        if (this._itemsIdMap == null) {
-            this._itemsIdMap = {};
-        }
-
-        const bugBash = new BugBash(bugBashModel);
-        this._itemsIdMap[bugBashModel.id.toLowerCase()] = bugBash;
-
-        // add in all items
-        const existingIndex = findIndex(this.items, (existingBugBash: BugBash) => stringEquals(bugBashModel.id, existingBugBash.id, true));
-        if (existingIndex !== -1) {
-            this.items[existingIndex] = bugBash;
-        } else {
-            this.items.push(bugBash);
-        }
-
-        this._filteredItems = this._applyFilterAndSort(this.items);
-    }
-
-    private _removeBugBash(bugBashId: string) {
-        if (!bugBashId || this.items == null || this.items.length === 0) {
-            return;
-        }
-
-        delete this._itemsIdMap[bugBashId.toLowerCase()];
-
-        // remove from all items
-        let existingIndex = findIndex(this.items, (existingBugBash: BugBash) => stringEquals(bugBashId, existingBugBash.id, true));
-        if (existingIndex !== -1) {
-            this.items.splice(existingIndex, 1);
-        }
-
-        // remove from filtered items
-        existingIndex = findIndex(this._filteredItems || [], (existingBugBash: BugBash) => stringEquals(bugBashId, existingBugBash.id, true));
-        if (existingIndex !== -1) {
-            this._filteredItems.splice(existingIndex, 1);
-        }
-    }
-}
+// Selectors for better performance
+export const useBugBashes = () => useBugBashStore(state => state.bugBashes);
+export const useCurrentBugBash = () => useBugBashStore(state => state.currentBugBash);
+export const useBugBashItems = () => useBugBashStore(state => state.bugBashItems);
+export const useCurrentBugBashItem = () => useBugBashStore(state => state.currentBugBashItem);
+export const useBugBashLoading = () => useBugBashStore(state => state.loading);
+export const useBugBashError = () => useBugBashStore(state => state.error);
+export const useBugBashFilters = () => useBugBashStore(state => state.filters);
+export const useBugBashAnalytics = () => useBugBashStore(state => state.analytics);
+export const useUserSettings = () => useBugBashStore(state => state.userSettings);

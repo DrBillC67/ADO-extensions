@@ -1,0 +1,341 @@
+.advanced-filters {
+  background-color: var(--white);
+  border: 1px solid var(--neutralLight);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.filters-header {
+  padding: 12px 16px;
+  background-color: var(--neutralLighter);
+  border-bottom: 1px solid var(--neutralLight);
+  
+  .filter-icon {
+    color: var(--themePrimary);
+    font-size: 16px;
+  }
+  
+  .filters-title {
+    font-weight: 600;
+    color: var(--neutralPrimary);
+  }
+  
+  .active-filters-badge {
+    background-color: var(--themePrimary);
+    color: var(--white);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .header-button {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    color: var(--neutralPrimary);
+    
+    &:hover {
+      background-color: var(--neutralLight);
+      color: var(--themePrimary);
+    }
+    
+    &:disabled {
+      color: var(--neutralTertiary);
+      cursor: not-allowed;
+      
+      &:hover {
+        background-color: transparent;
+        color: var(--neutralTertiary);
+      }
+    }
+  }
+  
+  .expand-button {
+    min-width: 60px;
+    height: 28px;
+    font-size: 12px;
+  }
+}
+
+.filters-content {
+  padding: 16px;
+  
+  .section-title {
+    font-weight: 600;
+    color: var(--neutralPrimary);
+    margin-bottom: 4px;
+  }
+  
+  .date-picker {
+    min-width: 150px;
+  }
+  
+  .filter-field {
+    max-width: 300px;
+  }
+}
+
+.saved-searches {
+  padding: 16px;
+  border-top: 1px solid var(--neutralLight);
+  background-color: var(--neutralLighterAlt);
+  
+  .section-title {
+    font-weight: 600;
+    color: var(--neutralPrimary);
+    margin-bottom: 8px;
+  }
+  
+  .saved-search-item {
+    padding: 8px 12px;
+    background-color: var(--white);
+    border: 1px solid var(--neutralLight);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      border-color: var(--themePrimary);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .search-icon {
+      color: var(--themePrimary);
+      font-size: 14px;
+    }
+    
+    .search-name {
+      font-weight: 500;
+      color: var(--neutralPrimary);
+    }
+    
+    .search-date {
+      color: var(--neutralSecondary);
+      font-size: 11px;
+    }
+    
+    .delete-button {
+      min-width: 24px;
+      height: 24px;
+      color: var(--errorText);
+      
+      &:hover {
+        background-color: var(--errorBackground);
+        color: var(--errorText);
+      }
+    }
+  }
+}
+
+.save-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.save-dialog {
+  background-color: var(--white);
+  border-radius: 8px;
+  padding: 24px;
+  min-width: 400px;
+  max-width: 500px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  
+  .dialog-title {
+    font-weight: 600;
+    color: var(--neutralPrimary);
+    margin-bottom: 8px;
+  }
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+// Dark theme support
+.vss-dark {
+  .advanced-filters {
+    background-color: var(--neutralLighter);
+    border-color: var(--neutralTertiary);
+  }
+  
+  .filters-header {
+    background-color: var(--neutralQuaternary);
+    border-bottom-color: var(--neutralTertiary);
+    
+    .filters-title {
+      color: var(--neutralPrimary);
+    }
+    
+    .header-button {
+      color: var(--neutralPrimary);
+      
+      &:hover {
+        background-color: var(--neutralTertiary);
+        color: var(--themePrimary);
+      }
+      
+      &:disabled {
+        color: var(--neutralSecondary);
+        
+        &:hover {
+          background-color: transparent;
+          color: var(--neutralSecondary);
+        }
+      }
+    }
+  }
+  
+  .filters-content {
+    .section-title {
+      color: var(--neutralPrimary);
+    }
+  }
+  
+  .saved-searches {
+    background-color: var(--neutralQuaternary);
+    border-top-color: var(--neutralTertiary);
+    
+    .section-title {
+      color: var(--neutralPrimary);
+    }
+    
+    .saved-search-item {
+      background-color: var(--neutralLighter);
+      border-color: var(--neutralTertiary);
+      
+      &:hover {
+        border-color: var(--themePrimary);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      
+      .search-name {
+        color: var(--neutralPrimary);
+      }
+      
+      .search-date {
+        color: var(--neutralTertiary);
+      }
+    }
+  }
+  
+  .save-dialog {
+    background-color: var(--neutralLighter);
+    
+    .dialog-title {
+      color: var(--neutralPrimary);
+    }
+  }
+  
+  .loading-overlay {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+// High contrast theme support
+.vss-high-contrast {
+  .advanced-filters {
+    border: 1px solid var(--neutralPrimary);
+  }
+  
+  .filters-header {
+    border-bottom: 1px solid var(--neutralPrimary);
+    
+    .header-button {
+      border: 1px solid var(--neutralPrimary);
+      
+      &:hover {
+        border-color: var(--themePrimary);
+        background-color: var(--themePrimary);
+        color: var(--white);
+      }
+      
+      &:disabled {
+        border-color: var(--neutralTertiary);
+        color: var(--neutralTertiary);
+        
+        &:hover {
+          border-color: var(--neutralTertiary);
+          background-color: transparent;
+          color: var(--neutralTertiary);
+        }
+      }
+    }
+  }
+  
+  .saved-searches {
+    border-top: 1px solid var(--neutralPrimary);
+    
+    .saved-search-item {
+      border: 1px solid var(--neutralPrimary);
+      
+      &:hover {
+        border-color: var(--themePrimary);
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .advanced-filters {
+    .filters-header {
+      padding: 8px 12px;
+      
+      .filters-title {
+        font-size: 14px;
+      }
+      
+      .header-button {
+        min-width: 24px;
+        height: 24px;
+      }
+      
+      .expand-button {
+        min-width: 50px;
+        height: 24px;
+        font-size: 11px;
+      }
+    }
+    
+    .filters-content {
+      padding: 12px;
+      
+      .date-picker {
+        min-width: 120px;
+      }
+      
+      .filter-field {
+        max-width: 250px;
+      }
+    }
+    
+    .saved-searches {
+      padding: 12px;
+    }
+  }
+  
+  .save-dialog {
+    min-width: 300px;
+    max-width: 90vw;
+    padding: 16px;
+  }
+} 

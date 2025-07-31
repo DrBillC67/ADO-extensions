@@ -1,0 +1,482 @@
+@import "../../../css/variables";
+
+.all-bug-bashes-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--background-color);
+  color: var(--text-color);
+
+  // View Header
+  .view-header {
+    padding: 16px 24px;
+    background-color: var(--header-background);
+    border-bottom: 1px solid var(--border-color);
+
+    .view-title {
+      font-weight: 600;
+      color: var(--primary-color);
+      margin: 0;
+    }
+  }
+
+  // Filters Section
+  .filters-section {
+    padding: 16px 24px;
+    background-color: var(--section-background);
+    border-bottom: 1px solid var(--border-color);
+
+    .search-box {
+      min-width: 300px;
+      max-width: 400px;
+
+      .ms-SearchBox {
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        background-color: var(--background-color);
+
+        &:hover {
+          border-color: var(--hover-color);
+        }
+
+        &:focus-within {
+          border-color: var(--focus-color);
+          box-shadow: 0 0 0 2px var(--focus-color-alpha);
+        }
+      }
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 8px;
+
+      .ms-Button {
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        background-color: var(--background-color);
+        color: var(--text-color);
+
+        &:hover {
+          background-color: var(--hover-color);
+          border-color: var(--hover-border-color);
+        }
+
+        &.ms-Button--primary {
+          background-color: var(--primary-color);
+          border-color: var(--primary-color);
+          color: white;
+
+          &:hover {
+            background-color: var(--primary-hover-color);
+            border-color: var(--primary-hover-color);
+          }
+        }
+      }
+    }
+
+    .sort-buttons {
+      .ms-Button {
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        background-color: var(--background-color);
+        color: var(--text-color);
+
+        &:hover {
+          background-color: var(--hover-color);
+          border-color: var(--hover-border-color);
+        }
+      }
+    }
+  }
+
+  // Bug Bashes List
+  .bug-bashes-list {
+    flex: 1;
+    overflow: auto;
+    padding: 16px 24px;
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      text-align: center;
+
+      .empty-title {
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 8px;
+      }
+
+      .empty-description {
+        color: var(--secondary-text-color);
+        margin-bottom: 24px;
+        max-width: 400px;
+      }
+
+      .empty-action {
+        border-radius: 4px;
+      }
+    }
+
+    .bug-bashes-details-list {
+      .ms-DetailsList {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--background-color);
+
+        .ms-DetailsList-headerWrapper {
+          background-color: var(--header-background);
+          border-bottom: 1px solid var(--border-color);
+
+          .ms-DetailsList-header {
+            background-color: transparent;
+            border: none;
+
+            .ms-DetailsList-cell {
+              color: var(--text-color);
+              font-weight: 600;
+              border-right: 1px solid var(--border-color);
+
+              &:last-child {
+                border-right: none;
+              }
+            }
+          }
+        }
+
+        .ms-DetailsList-contentWrapper {
+          .ms-DetailsRow {
+            background-color: var(--background-color);
+            border-bottom: 1px solid var(--border-color);
+
+            &:hover {
+              background-color: var(--hover-color);
+            }
+
+            &:last-child {
+              border-bottom: none;
+            }
+
+            .ms-DetailsList-cell {
+              color: var(--text-color);
+              border-right: 1px solid var(--border-color);
+
+              &:last-child {
+                border-right: none;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Bug Bash Title
+  .bug-bash-title {
+    .title-text {
+      font-weight: 500;
+      color: var(--text-color);
+      margin-bottom: 4px;
+    }
+
+    .description-text {
+      color: var(--secondary-text-color);
+      line-height: 1.4;
+    }
+  }
+
+  // Status Badge
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+
+    &.active {
+      background-color: var(--success-color-alpha);
+      color: var(--success-color);
+      border: 1px solid var(--success-color);
+    }
+
+    &.inactive {
+      background-color: var(--warning-color-alpha);
+      color: var(--warning-color);
+      border: 1px solid var(--warning-color);
+    }
+  }
+
+  // Date Range
+  .date-range {
+    .ms-Text {
+      color: var(--secondary-text-color);
+    }
+  }
+
+  // Bug Bash Actions
+  .bug-bash-actions {
+    position: relative;
+
+    .ms-IconButton {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      color: var(--icon-color);
+
+      &:hover {
+        background-color: var(--hover-color);
+        color: var(--hover-text-color);
+      }
+    }
+
+    .actions-callout {
+      z-index: 1000;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--border-color);
+      background-color: var(--background-color);
+
+      .actions-menu {
+        padding: 8px;
+
+        .ms-Button {
+          width: 100%;
+          justify-content: flex-start;
+          border: none;
+          background: transparent;
+          color: var(--text-color);
+          border-radius: 4px;
+
+          &:hover {
+            background-color: var(--hover-color);
+          }
+
+          &.delete-action {
+            color: var(--error-color);
+
+            &:hover {
+              background-color: var(--error-color-alpha);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Error Details
+  .error-details {
+    margin-top: 8px;
+    color: var(--error-color);
+    font-family: var(--monospace-font);
+    font-size: 12px;
+    background-color: var(--error-background);
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--error-border-color);
+  }
+}
+
+// Theme support
+[data-theme="dark"] {
+  .all-bug-bashes-view {
+    --background-color: #1f1f1f;
+    --header-background: #2d2d2d;
+    --section-background: #2d2d2d;
+    --text-color: #ffffff;
+    --secondary-text-color: #cccccc;
+    --border-color: #404040;
+    --hover-color: #404040;
+    --hover-border-color: #505050;
+    --focus-color: #0078d4;
+    --focus-color-alpha: rgba(0, 120, 212, 0.2);
+    --primary-color: #0078d4;
+    --primary-hover-color: #106ebe;
+    --success-color: #107c10;
+    --success-color-alpha: rgba(16, 124, 16, 0.1);
+    --warning-color: #ff8c00;
+    --warning-color-alpha: rgba(255, 140, 0, 0.1);
+    --error-color: #f1707b;
+    --error-color-alpha: rgba(241, 112, 123, 0.1);
+    --error-background: rgba(241, 112, 123, 0.1);
+    --error-border-color: #f1707b;
+    --icon-color: #cccccc;
+    --hover-text-color: #ffffff;
+  }
+}
+
+[data-theme="highContrast"] {
+  .all-bug-bashes-view {
+    --background-color: #000000;
+    --header-background: #000000;
+    --section-background: #000000;
+    --text-color: #ffffff;
+    --secondary-text-color: #ffffff;
+    --border-color: #ffffff;
+    --hover-color: #ffff00;
+    --hover-border-color: #ffff00;
+    --focus-color: #ffff00;
+    --focus-color-alpha: rgba(255, 255, 0, 0.2);
+    --primary-color: #ffff00;
+    --primary-hover-color: #ffff00;
+    --success-color: #00ff00;
+    --success-color-alpha: rgba(0, 255, 0, 0.2);
+    --warning-color: #ffff00;
+    --warning-color-alpha: rgba(255, 255, 0, 0.2);
+    --error-color: #ff0000;
+    --error-color-alpha: rgba(255, 0, 0, 0.2);
+    --error-background: #000000;
+    --error-border-color: #ff0000;
+    --icon-color: #ffffff;
+    --hover-text-color: #000000;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .all-bug-bashes-view {
+    .view-header {
+      padding: 12px 16px;
+
+      .view-title {
+        font-size: 20px;
+      }
+    }
+
+    .filters-section {
+      padding: 12px 16px;
+
+      .search-box {
+        min-width: 200px;
+        max-width: 300px;
+      }
+
+      .filter-buttons {
+        flex-wrap: wrap;
+        gap: 4px;
+
+        .ms-Button {
+          font-size: 12px;
+          padding: 4px 8px;
+        }
+      }
+    }
+
+    .bug-bashes-list {
+      padding: 12px 16px;
+
+      .bug-bashes-details-list {
+        .ms-DetailsList {
+          .ms-DetailsList-headerWrapper {
+            .ms-DetailsList-header {
+              .ms-DetailsList-cell {
+                font-size: 12px;
+                padding: 8px 4px;
+              }
+            }
+          }
+
+          .ms-DetailsList-contentWrapper {
+            .ms-DetailsRow {
+              .ms-DetailsList-cell {
+                font-size: 12px;
+                padding: 8px 4px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .all-bug-bashes-view {
+    .view-header {
+      padding: 8px 12px;
+
+      .view-title {
+        font-size: 18px;
+      }
+    }
+
+    .filters-section {
+      padding: 8px 12px;
+
+      .search-box {
+        min-width: 150px;
+        max-width: 200px;
+      }
+    }
+
+    .bug-bashes-list {
+      padding: 8px 12px;
+    }
+  }
+}
+
+// Animation support
+@media (prefers-reduced-motion: no-preference) {
+  .all-bug-bashes-view {
+    .filters-section {
+      .search-box .ms-SearchBox,
+      .filter-buttons .ms-Button,
+      .sort-buttons .ms-Button {
+        transition: all 0.2s ease-in-out;
+      }
+    }
+
+    .bug-bashes-details-list {
+      .ms-DetailsList-contentWrapper .ms-DetailsRow {
+        transition: background-color 0.2s ease-in-out;
+      }
+    }
+
+    .bug-bash-actions {
+      .ms-IconButton {
+        transition: all 0.2s ease-in-out;
+      }
+    }
+  }
+}
+
+// Focus styles for accessibility
+.all-bug-bashes-view {
+  .filters-section {
+    .search-box .ms-SearchBox:focus-within {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 2px;
+    }
+
+    .filter-buttons .ms-Button:focus-visible,
+    .sort-buttons .ms-Button:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 2px;
+    }
+  }
+
+  .bug-bash-actions {
+    .ms-IconButton:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 2px;
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .all-bug-bashes-view {
+    .view-header {
+      display: none;
+    }
+
+    .filters-section {
+      display: none;
+    }
+
+    .bug-bash-actions {
+      display: none;
+    }
+  }
+} 

@@ -1,0 +1,87 @@
+@import "../../../css/variables";
+
+.pr-work-items-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+
+  // App Container
+  .app-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  // Dialog Container
+  .dialog-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+}
+
+// Theme support
+[data-theme="dark"] {
+  .pr-work-items-app {
+    --background-color: #1f1f1f;
+    --text-color: #ffffff;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+}
+
+[data-theme="highContrast"] {
+  .pr-work-items-app {
+    --background-color: #000000;
+    --text-color: #ffffff;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .pr-work-items-app {
+    .app-container {
+      padding: 8px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .pr-work-items-app {
+    .app-container {
+      padding: 4px;
+    }
+  }
+}
+
+// Animation support
+@media (prefers-reduced-motion: no-preference) {
+  .pr-work-items-app {
+    .app-container {
+      transition: all 0.2s ease-in-out;
+    }
+  }
+}
+
+// Focus styles for accessibility
+.pr-work-items-app {
+  .app-container:focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 2px;
+  }
+}
+
+// Print styles
+@media print {
+  .pr-work-items-app {
+    .app-container {
+      background-color: white;
+      color: black;
+    }
+  }
+} 

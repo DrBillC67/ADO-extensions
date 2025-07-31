@@ -1,13 +1,32 @@
-import "./Loading.scss";
+import * as React from 'react';
+import { Spinner, SpinnerSize } from '@fluentui/react';
+import { LoadingProps } from './Loading.types';
+import './Loading.scss';
 
-import * as React from "react";
+export const Loading: React.FC<LoadingProps> = ({
+  size = SpinnerSize.large,
+  label = 'Loading...',
+  overlay = false,
+  className,
+  ...props
+}) => {
+  const content = (
+    <div className={`loading-container ${className || ''}`} {...props}>
+      <Spinner 
+        size={size} 
+        label={label}
+        className="loading-spinner"
+      />
+    </div>
+  );
 
-import { Spinner, SpinnerSize } from "OfficeFabric/Spinner";
-
-export const Loading: React.StatelessComponent<any> = (): JSX.Element => {
+  if (overlay) {
     return (
-        <div className="content-loading">
-            <Spinner className="loading-spinner" size={SpinnerSize.large} />
-        </div>
+      <div className="loading-overlay">
+        {content}
+      </div>
     );
+  }
+
+  return content;
 };

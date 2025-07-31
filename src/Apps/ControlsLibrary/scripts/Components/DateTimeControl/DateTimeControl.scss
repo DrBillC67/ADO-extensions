@@ -1,0 +1,307 @@
+@import "../../../css/variables";
+
+.date-time-control {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  // Label
+  .date-time-label {
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 4px;
+
+    .required-indicator {
+      color: var(--error-color);
+      margin-left: 4px;
+    }
+  }
+
+  // Input Container
+  .date-time-picker-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--background-color);
+    transition: all 0.2s ease-in-out;
+    min-height: 32px;
+
+    &:hover {
+      border-color: var(--hover-color);
+    }
+
+    &.active {
+      border-color: var(--focus-color);
+      box-shadow: 0 0 0 2px var(--focus-color-alpha);
+    }
+
+    &.disabled {
+      background-color: var(--disabled-color);
+      border-color: var(--disabled-border-color);
+      cursor: not-allowed;
+      opacity: 0.6;
+
+      &:hover {
+        border-color: var(--disabled-border-color);
+      }
+    }
+
+    // Input Field
+    .date-time-picker-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 6px 8px;
+      font-size: 14px;
+      color: var(--text-color);
+      outline: none;
+
+      &::placeholder {
+        color: var(--placeholder-color);
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+        color: var(--disabled-text-color);
+      }
+    }
+
+    // Action Buttons
+    .date-time-picker-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+
+      .date-time-picker-icon {
+        width: 24px;
+        height: 24px;
+        border: none;
+        background: transparent;
+        color: var(--icon-color);
+        cursor: pointer;
+        border-radius: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease-in-out;
+
+        &:hover {
+          background-color: var(--hover-color);
+          color: var(--hover-text-color);
+        }
+
+        &:active {
+          background-color: var(--active-color);
+        }
+
+        &:disabled {
+          cursor: not-allowed;
+          color: var(--disabled-icon-color);
+          opacity: 0.5;
+
+          &:hover {
+            background-color: transparent;
+            color: var(--disabled-icon-color);
+          }
+        }
+
+        &.clear-icon {
+          color: var(--error-color);
+
+          &:hover {
+            background-color: var(--error-color-alpha);
+            color: var(--error-color);
+          }
+        }
+
+        &.time-icon {
+          color: var(--secondary-color);
+        }
+      }
+    }
+
+    // Loading State
+    .date-time-loading {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1;
+    }
+  }
+
+  // Error Message
+  .date-time-error {
+    margin-top: 4px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  // Info Message
+  .date-time-info {
+    margin-top: 4px;
+    color: var(--info-color);
+    font-size: 12px;
+  }
+
+  // Calendar Callout
+  .date-time-picker-callout {
+    z-index: 1000;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+    background-color: var(--background-color);
+
+    .date-time-picker-content {
+      padding: 16px;
+      min-width: 280px;
+    }
+  }
+}
+
+// Theme support
+[data-theme="dark"] {
+  .date-time-control {
+    --background-color: #2d2d2d;
+    --text-color: #ffffff;
+    --border-color: #404040;
+    --hover-color: #404040;
+    --focus-color: #0078d4;
+    --focus-color-alpha: rgba(0, 120, 212, 0.2);
+    --disabled-color: #1f1f1f;
+    --disabled-border-color: #333333;
+    --disabled-text-color: #666666;
+    --disabled-icon-color: #666666;
+    --icon-color: #cccccc;
+    --hover-text-color: #ffffff;
+    --active-color: #005a9e;
+    --error-color: #f1707b;
+    --error-color-alpha: rgba(241, 112, 123, 0.1);
+    --secondary-color: #0078d4;
+    --info-color: #8cc4ff;
+    --placeholder-color: #666666;
+  }
+}
+
+[data-theme="highContrast"] {
+  .date-time-control {
+    --background-color: #000000;
+    --text-color: #ffffff;
+    --border-color: #ffffff;
+    --hover-color: #ffff00;
+    --focus-color: #ffff00;
+    --focus-color-alpha: rgba(255, 255, 0, 0.2);
+    --disabled-color: #000000;
+    --disabled-border-color: #666666;
+    --disabled-text-color: #666666;
+    --disabled-icon-color: #666666;
+    --icon-color: #ffffff;
+    --hover-text-color: #000000;
+    --active-color: #ffff00;
+    --error-color: #ff0000;
+    --error-color-alpha: rgba(255, 0, 0, 0.2);
+    --secondary-color: #ffff00;
+    --info-color: #00ff00;
+    --placeholder-color: #666666;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .date-time-control {
+    .date-time-picker-input-container {
+      min-height: 40px;
+
+      .date-time-picker-input {
+        padding: 8px 12px;
+        font-size: 16px; // Prevent zoom on iOS
+      }
+
+      .date-time-picker-actions {
+        padding: 6px;
+
+        .date-time-picker-icon {
+          width: 28px;
+          height: 28px;
+        }
+      }
+    }
+
+    .date-time-picker-callout {
+      .date-time-picker-content {
+        min-width: 320px;
+        padding: 20px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .date-time-control {
+    .date-time-picker-input-container {
+      min-height: 44px;
+
+      .date-time-picker-input {
+        padding: 10px 14px;
+      }
+
+      .date-time-picker-actions {
+        padding: 8px;
+
+        .date-time-picker-icon {
+          width: 32px;
+          height: 32px;
+        }
+      }
+    }
+
+    .date-time-picker-callout {
+      .date-time-picker-content {
+        min-width: 280px;
+        padding: 16px;
+      }
+    }
+  }
+}
+
+// Animation support
+@media (prefers-reduced-motion: no-preference) {
+  .date-time-control {
+    .date-time-picker-input-container {
+      transition: all 0.2s ease-in-out;
+
+      .date-time-picker-actions .date-time-picker-icon {
+        transition: all 0.2s ease-in-out;
+      }
+    }
+  }
+}
+
+// Focus styles for accessibility
+.date-time-control {
+  .date-time-picker-input-container:focus-within {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 2px;
+  }
+
+  .date-time-picker-icon:focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 2px;
+  }
+}
+
+// Print styles
+@media print {
+  .date-time-control {
+    .date-time-picker-actions {
+      display: none;
+    }
+
+    .date-time-picker-callout {
+      display: none;
+    }
+  }
+} 

@@ -1,0 +1,182 @@
+.checklist-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background-color: var(--neutralLighterAlt);
+  border-radius: 6px;
+  min-height: 200px;
+}
+
+.progress-container {
+  padding: 12px 16px;
+  background-color: var(--white);
+  border-radius: 4px;
+  border: 1px solid var(--neutralLight);
+  
+  .progress-text {
+    color: var(--neutralPrimary);
+    font-weight: 500;
+  }
+  
+  .progress-indicator {
+    min-width: 120px;
+  }
+}
+
+.checklist-items-container {
+  flex: 1;
+  min-height: 100px;
+}
+
+.checklist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.checklist-item-container {
+  display: flex;
+  align-items: center;
+  background-color: var(--white);
+  border-radius: 4px;
+  border: 1px solid var(--neutralLight);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: var(--themePrimary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .drag-handle {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    opacity: 0.5;
+    cursor: grab;
+    color: var(--neutralSecondary);
+    
+    &:hover {
+      opacity: 1;
+      color: var(--themePrimary);
+    }
+    
+    &:active {
+      cursor: grabbing;
+    }
+  }
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background-color: var(--white);
+  border-radius: 4px;
+  border: 2px dashed var(--neutralLight);
+  
+  .empty-text {
+    color: var(--neutralSecondary);
+    text-align: center;
+  }
+}
+
+.add-item-editor {
+  background-color: var(--white);
+  border-radius: 4px;
+  border: 1px solid var(--neutralLight);
+  padding: 12px;
+}
+
+// Sortable helper styles
+.sortable-helper {
+  background-color: var(--white);
+  border: 2px solid var(--themePrimary);
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  opacity: 0.9;
+  transform: rotate(2deg);
+  z-index: 1000;
+}
+
+// Dark theme support
+.vss-dark {
+  .checklist-view {
+    background-color: var(--neutralQuaternaryAlt);
+  }
+  
+  .progress-container {
+    background-color: var(--neutralLighter);
+    border-color: var(--neutralTertiary);
+  }
+  
+  .checklist-item-container {
+    background-color: var(--neutralLighter);
+    border-color: var(--neutralTertiary);
+    
+    &:hover {
+      border-color: var(--themePrimary);
+    }
+  }
+  
+  .empty-state {
+    background-color: var(--neutralLighter);
+    border-color: var(--neutralTertiary);
+  }
+  
+  .add-item-editor {
+    background-color: var(--neutralLighter);
+    border-color: var(--neutralTertiary);
+  }
+}
+
+// High contrast theme support
+.vss-high-contrast {
+  .checklist-view {
+    border: 1px solid var(--neutralPrimary);
+  }
+  
+  .progress-container {
+    border: 1px solid var(--neutralPrimary);
+  }
+  
+  .checklist-item-container {
+    border: 1px solid var(--neutralPrimary);
+    
+    &:hover {
+      border-color: var(--themePrimary);
+      border-width: 2px;
+    }
+  }
+  
+  .empty-state {
+    border: 2px dashed var(--neutralPrimary);
+  }
+  
+  .add-item-editor {
+    border: 1px solid var(--neutralPrimary);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .checklist-view {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .progress-container {
+    padding: 8px 12px;
+    
+    .progress-indicator {
+      min-width: 80px;
+    }
+  }
+  
+  .checklist-item-container {
+    .drag-handle {
+      padding: 6px;
+    }
+  }
+} 

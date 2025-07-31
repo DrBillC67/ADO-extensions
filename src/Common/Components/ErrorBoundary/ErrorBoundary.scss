@@ -1,0 +1,150 @@
+.error-boundary-fallback {
+  padding: 16px;
+  
+  .error-message-bar {
+    border-radius: 6px;
+    border: 1px solid var(--errorText);
+    
+    .error-title {
+      font-weight: 600;
+      color: var(--errorText);
+    }
+    
+    .error-message {
+      color: var(--neutralPrimary);
+      line-height: 1.4;
+    }
+    
+    .retry-button {
+      background-color: var(--errorText);
+      border-color: var(--errorText);
+      
+      &:hover {
+        background-color: var(--errorBackground);
+        border-color: var(--errorBackground);
+      }
+    }
+    
+    .report-button {
+      background-color: var(--themePrimary);
+      border-color: var(--themePrimary);
+      
+      &:hover {
+        background-color: var(--themeDarkAlt);
+        border-color: var(--themeDarkAlt);
+      }
+    }
+    
+    .error-details {
+      margin-top: 16px;
+      border-top: 1px solid var(--neutralLight);
+      padding-top: 16px;
+      
+      .details-title {
+        font-weight: 600;
+        color: var(--neutralPrimary);
+        margin-bottom: 8px;
+      }
+      
+      .error-details-list {
+        border: 1px solid var(--neutralLight);
+        border-radius: 4px;
+        
+        .ms-DetailsList-contentWrapper {
+          .ms-DetailsList-content {
+            .ms-DetailsRow {
+              border-bottom: 1px solid var(--neutralLight);
+              
+              &:last-child {
+                border-bottom: none;
+              }
+            }
+          }
+        }
+      }
+      
+      .error-detail-value {
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 12px;
+        color: var(--neutralSecondary);
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    }
+  }
+}
+
+// Dark theme support
+.vss-dark {
+  .error-boundary-fallback {
+    .error-message-bar {
+      border-color: var(--errorText);
+      
+      .error-details {
+        border-top-color: var(--neutralTertiary);
+        
+        .error-details-list {
+          border-color: var(--neutralTertiary);
+          
+          .ms-DetailsList-contentWrapper {
+            .ms-DetailsList-content {
+              .ms-DetailsRow {
+                border-bottom-color: var(--neutralTertiary);
+              }
+            }
+          }
+        }
+        
+        .error-detail-value {
+          color: var(--neutralTertiary);
+        }
+      }
+    }
+  }
+}
+
+// High contrast theme support
+.vss-high-contrast {
+  .error-boundary-fallback {
+    .error-message-bar {
+      border: 2px solid var(--errorText);
+      
+      .error-details {
+        border-top: 2px solid var(--neutralPrimary);
+        
+        .error-details-list {
+          border: 2px solid var(--neutralPrimary);
+          
+          .ms-DetailsList-contentWrapper {
+            .ms-DetailsList-content {
+              .ms-DetailsRow {
+                border-bottom: 1px solid var(--neutralPrimary);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .error-boundary-fallback {
+    padding: 12px;
+    
+    .error-message-bar {
+      .error-details {
+        .error-details-list {
+          .ms-DetailsList-contentWrapper {
+            .ms-DetailsList-content {
+              .ms-DetailsRow {
+                padding: 8px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+} 

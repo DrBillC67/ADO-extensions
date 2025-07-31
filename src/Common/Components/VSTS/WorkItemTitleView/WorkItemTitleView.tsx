@@ -1,101 +1,81 @@
-import "./WorkItemTitleView.scss";
+import * as React from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Link, TooltipHost, DirectionalHint, TooltipDelay, TooltipOverflowMode } from '@fluentui/react';
+import { WorkItem } from 'TFS/WorkItemTracking/Contracts';
+import { WorkItemType } from 'TFS/WorkItemTracking/Contracts';
+import { WorkItemTitleViewProps } from './WorkItemTitleView.types';
+import { useWorkItemTypes } from '../../hooks/useWorkItemTypes';
+import './WorkItemTitleView.scss';
 
-import * as React from "react";
+export const WorkItemTitleView: React.FC<WorkItemTitleViewProps> = ({
+  workItem,
+  showId = true,
+  onClick,
+  className,
+  ...props
+}) => {
+  const { types, loading } = useWorkItemTypes();
+  const [workItemType, setWorkItemType] = useState<WorkItemType | null>(null);
 
-import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
-import { WorkItemTypeActions } from "Common/Flux/Actions/WorkItemTypeActions";
-import { BaseStore, StoreFactory } from "Common/Flux/Stores/BaseStore";
-import { WorkItemTypeStore } from "Common/Flux/Stores/WorkItemTypeStore";
-import { stringEquals } from "Common/Utilities/String";
-import { Link } from "OfficeFabric/Link";
-import {
-    DirectionalHint, TooltipDelay, TooltipHost, TooltipOverflowMode
-} from "OfficeFabric/Tooltip";
-import { css } from "OfficeFabric/Utilities";
-import { WorkItemType } from "TFS/WorkItemTracking/Contracts";
-
-export interface IWorkItemTitleViewProps extends IBaseFluxComponentProps {
-    workItemId: number;
-    title: string;
-    workItemType: string;
-    showId?: boolean;
-    onClick?(e: React.MouseEvent<HTMLElement>): void;
-}
-
-export interface IWorkItemTitleViewState extends IBaseFluxComponentState {
-    workItemType: WorkItemType;
-}
-
-export class WorkItemTitleView extends BaseFluxComponent<IWorkItemTitleViewProps, IWorkItemTitleViewState> {
-    private _workItemTypeStore = StoreFactory.getInstance<WorkItemTypeStore>(WorkItemTypeStore);
-
-    public componentDidMount() {
-        super.componentDidMount();
-        if (this._workItemTypeStore.isLoaded()) {
-            this.setState({
-                workItemType: this._workItemTypeStore.getItem(this.props.workItemType)
-            });
-        } else {
-            WorkItemTypeActions.initializeWorkItemTypes();
-        }
+  // Find the work item type based on the work item's type field
+  useEffect(() => {
+    if (types.length > 0 && workItem) {
+      const typeName = workItem.fields['System.WorkItemType'];
+      const foundType = types.find(t => t.name === typeName);
+      setWorkItemType(foundType || null);
     }
+  }, [types, workItem]);
 
-    public componentWillReceiveProps(nextProps: IWorkItemTitleViewProps, context?: any) {
-        super.componentWillReceiveProps(nextProps, context);
-
-        if (!stringEquals(nextProps.workItemType, this.props.workItemType, true)) {
-            if (this._workItemTypeStore.isLoaded()) {
-                this.setState({
-                    workItemType: this._workItemTypeStore.getItem(nextProps.workItemType)
-                });
-            }
-        }
+  const handleClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    if (onClick && !e.ctrlKey) {
+      e.preventDefault();
+      onClick(e);
     }
+  }, [onClick]);
 
-    public render(): JSX.Element {
-        const wit = this.state.workItemType;
+  const workItemUrl = useMemo(() => {
+    if (!workItem) return '';
+    const webContext = VSS.getWebContext();
+    return `${webContext.collection.uri}/${webContext.project.name}/_workitems/edit/${workItem.id}`;
+  }, [workItem]);
 
-        const witIcon = wit ? wit.icon : null;
-        const witIconUrl = witIcon && witIcon.id ? witIcon.url : null;
+  const title = workItem?.fields['System.Title'] || 'Untitled';
+  const workItemId = workItem?.id;
 
-        const webContext = VSS.getWebContext();
-        const witUrl = `${webContext.collection.uri}/${webContext.project.name}/_workitems/edit/${this.props.workItemId}`;
+  if (loading) {
+    return <div className="work-item-title-loading">Loading...</div>;
+  }
 
-        return (
-            <div className={`${css("work-item-title-view", this.props.className)}`}>
-                {witIconUrl && <img src={witIconUrl} alt="icon" />}
-                {this.props.showId && <span className="work-item-id">{this.props.workItemId}</span>}
-                <div className="title-link">
-                    <TooltipHost content={this.props.title} delay={TooltipDelay.medium} overflowMode={TooltipOverflowMode.Parent} directionalHint={DirectionalHint.bottomLeftEdge}>
-                        <Link href={witUrl} onClick={this._onLinkClick}>
-                            {this.props.title}
-                        </Link>
-                    </TooltipHost>
-                </div>
-            </div>
-        );
-    }
-
-    protected getInitialState(): IWorkItemTitleViewState {
-        return { workItemType: null };
-    }
-
-    protected getStores(): BaseStore<any, any, any>[] {
-        return [this._workItemTypeStore];
-    }
-
-    protected getStoresState(): IWorkItemTitleViewState {
-        return {
-            workItemType: this._workItemTypeStore.isLoaded() ? this._workItemTypeStore.getItem(this.props.workItemType) : null
-        };
-    }
-
-    private _onLinkClick = (e: React.MouseEvent<HTMLElement>) => {
-        if (this.props.onClick && !e.ctrlKey) {
-            e.preventDefault();
-            this.props.onClick(e);
-        }
-    };
-}
+  return (
+    <div className={`work-item-title-view ${className || ''}`} {...props}>
+      {workItemType?.icon?.url && (
+        <img 
+          src={workItemType.icon.url} 
+          alt={workItemType.name}
+          className="work-item-type-icon"
+        />
+      )}
+      
+      {showId && workItemId && (
+        <span className="work-item-id">#{workItemId}</span>
+      )}
+      
+      <div className="title-link">
+        <TooltipHost 
+          content={title} 
+          delay={TooltipDelay.medium} 
+          overflowMode={TooltipOverflowMode.Parent} 
+          directionalHint={DirectionalHint.bottomLeftEdge}
+        >
+          <Link 
+            href={workItemUrl} 
+            onClick={handleClick}
+            className="work-item-link"
+          >
+            {title}
+          </Link>
+        </TooltipHost>
+      </div>
+    </div>
+  );
+};

@@ -14,6 +14,17 @@ Default items are not sortable or removable from work item form. Users can do th
 
 # Changelog
 <a name="changelog" id="changelog"></a>
+**(07/30/25) Version 3.0 - Modernization Release:** 
+* **Modern React Architecture**: Converted to functional components with React hooks
+* **Fluent UI v8**: Migrated from OfficeFabric to @fluentui/react for better design system
+* **Zustand State Management**: Replaced Flux with modern Zustand store for simpler state management
+* **Enhanced UX**: Progress indicators, improved drag & drop, better accessibility
+* **Performance Improvements**: Optimized rendering, reduced bundle size, faster interactions
+* **Modern Styling**: SCSS with theme support (light, dark, high contrast)
+* **Type Safety**: Enhanced TypeScript types and interfaces
+* **Custom Hooks**: Separated business logic into reusable hooks
+* **Responsive Design**: Better mobile and tablet support
+
 **(05/06/18) Version 3.0:** 
 * Added support for adding default checklist items for a work item type.
 
