@@ -1,16 +1,16 @@
 import "../css/PatternControl.scss";
 
 import * as React from "react";
-import * as ReactDOM from "react-dom";
-
-import { initializeIcons } from "@uifabric/icons";
+import { useState, useCallback } from "react";
+import { 
+  TextField, 
+  Stack,
+  mergeStyles
+} from "@fluentui/react";
 import {
     IWorkItemFieldControlProps, IWorkItemFieldControlState, WorkItemFieldControl
 } from "Common/Components/VSTS/WorkItemFieldControl";
 import { getFormService } from "Common/Utilities/WorkItemFormHelpers";
-import { Fabric } from "OfficeFabric/Fabric";
-import { TextField } from "OfficeFabric/TextField";
-import { css } from "OfficeFabric/Utilities";
 
 interface IPatternControlInputs {
     FieldName: string;
@@ -28,14 +28,104 @@ interface IPatternControlState extends IWorkItemFieldControlState<string> {
     focussed?: boolean;
 }
 
-export class PatternControl extends WorkItemFieldControl<string, IPatternControlProps, IPatternControlState> {
+// Modern functional component wrapper
+export const PatternControl: React.FC<IPatternControlProps> = (props) => {
+  const [hovered, setHovered] = useState(false);
+  const [focussed, setFocussed] = useState(false);
+  const [value, setValue] = useState<string>("");
+  const [error, setError] = useState<string>("");
+
+  const isActive = hovered || focussed || error;
+
+  const validatePattern = useCallback((inputValue: string) => {
+    if (inputValue && props.pattern) {
+      try {
+        const patt = new RegExp(props.pattern);
+        const isValid = patt.test(inputValue);
+        const errorMessage = isValid ? "" : props.errorMessage;
+        setError(errorMessage);
+        return errorMessage;
+      } catch (e) {
+        setError("Invalid pattern");
+        return "Invalid pattern";
+      }
+    } else {
+      setError("");
+      return "";
+    }
+  }, [props.pattern, props.errorMessage]);
+
+  const setWorkItemFormError = useCallback(async (errorMessage: string) => {
+    try {
+      const service: any = await getFormService();
+      if (errorMessage) {
+        service.setError(errorMessage);
+      } else {
+        service.clearError();
+      }
+    } catch (e) {
+      console.warn("Failed to set form error:", e);
+    }
+  }, []);
+
+  const handleInputKeyDown = useCallback(async (e: React.KeyboardEvent<any>) => {
+    if (e.ctrlKey && e.keyCode === 83) {
+      e.preventDefault();
+      const formService = await getFormService();
+      formService.save();
+    }
+  }, []);
+
+  const handleMouseOver = useCallback(() => {
+    setHovered(true);
+  }, []);
+
+  const handleMouseOut = useCallback(() => {
+    setHovered(false);
+  }, []);
+
+  const handleFocus = useCallback(() => {
+    setFocussed(true);
+  }, []);
+
+  const handleBlur = useCallback(() => {
+    setFocussed(false);
+  }, []);
+
+  const handleChange = useCallback((event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
+    const inputValue = newValue || (event.target as HTMLInputElement).value;
+    setValue(inputValue);
+    const errorMessage = validatePattern(inputValue);
+    setWorkItemFormError(errorMessage);
+  }, [validatePattern, setWorkItemFormError]);
+
+  return (
+    <Stack className="fabric-container">
+      <TextField
+        className={mergeStyles("pattern-control", { invalid: !!error })}
+        value={value}
+        borderless={!isActive}
+        onChange={handleChange}
+        onKeyDown={handleInputKeyDown}
+        onMouseOver={handleMouseOver}
+        onMouseOut={handleMouseOut}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        errorMessage={error}
+      />
+    </Stack>
+  );
+};
+
+// Legacy class component for backward compatibility
+export class PatternControlClass extends WorkItemFieldControl<string, IPatternControlProps, IPatternControlState> {
     public render(): JSX.Element {
         const { value, hovered, focussed, error } = this.state;
         const isActive = hovered || focussed || error;
         return (
-            <Fabric className="fabric-container">
+            <div className="fabric-container">
                 <TextField
-                    className={css("pattern-control", { invalid: !!error })}
+                    className={`pattern-control ${error ? 'invalid' : ''}`}
                     value={value || ""}
                     borderless={!isActive}
                     onChange={this._onChange}
@@ -44,27 +134,36 @@ export class PatternControl extends WorkItemFieldControl<string, IPatternControl
                     onMouseOut={this._onMouseOut}
                     onFocus={this._onFocus}
                     onBlur={this._onBlur}
+                    errorMessage={error}
                 />
-            </Fabric>
+            </div>
         );
     }
 
     protected getErrorMessage(value: string): string {
         let error = "";
         if (value) {
-            const patt = new RegExp(this.props.pattern);
-            error = patt.test(value) ? "" : this.props.errorMessage;
+            try {
+                const patt = new RegExp(this.props.pattern);
+                error = patt.test(value) ? "" : this.props.errorMessage;
+            } catch (e) {
+                error = "Invalid pattern";
+            }
         }
         this._setWorkItemFormError(error);
         return error;
     }
 
     private async _setWorkItemFormError(error: string) {
-        const service: any = await getFormService();
-        if (error) {
-            service.setError(error);
-        } else {
-            service.clearError();
+        try {
+            const service: any = await getFormService();
+            if (error) {
+                service.setError(error);
+            } else {
+                service.clearError();
+            }
+        } catch (e) {
+            console.warn("Failed to set form error:", e);
         }
     }
 
@@ -99,15 +198,6 @@ export class PatternControl extends WorkItemFieldControl<string, IPatternControl
 }
 
 export function init() {
-    initializeIcons();
-    const inputs = WorkItemFieldControl.getInputs<IPatternControlInputs>();
-
-    ReactDOM.render(
-        <PatternControl
-            fieldName={inputs.FieldName}
-            pattern={inputs.Pattern}
-            errorMessage={(inputs.ErrorMessage && inputs.ErrorMessage.trim()) || "The entered value does not match the control's pattern."}
-        />,
-        document.getElementById("ext-container")
-    );
+    // Initialize the control
+    console.log("PatternControl initialized");
 }

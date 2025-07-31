@@ -1,14 +1,13 @@
 import "../css/PlainTextControl.scss";
 
 import * as React from "react";
-import * as ReactDOM from "react-dom";
-
+import { useState, useEffect, useCallback } from "react";
+import { Stack } from "@fluentui/react";
 import { AutoResizableComponent } from "Common/Components/Utilities/AutoResizableComponent";
 import { first } from "Common/Utilities/Array";
 import { isNullOrWhiteSpace, stringEquals } from "Common/Utilities/String";
 import { getFormService } from "Common/Utilities/WorkItemFormHelpers";
 import * as MarkdownIt from "markdown-it";
-import { Fabric } from "OfficeFabric/Fabric";
 import {
     IWorkItemChangedArgs, IWorkItemLoadedArgs, IWorkItemNotificationListener
 } from "TFS/WorkItemTracking/ExtensionContracts";
@@ -84,7 +83,39 @@ async function getFieldValue(fieldName: string): Promise<any> {
     }
 }
 
-export class PlainTextControl extends AutoResizableComponent<IPlainTextControlProps, IPlainTextControlState> {
+// Modern functional component wrapper
+export const PlainTextControl: React.FC<IPlainTextControlProps> = (props) => {
+  const [translatedText, setTranslatedText] = useState<string>("");
+  const [markdown] = useState(() => new MarkdownIt({ linkify: true }));
+
+  const setText = useCallback(async () => {
+    try {
+      const processedText = await processString(props.text);
+      const html = markdown.render(processedText);
+      setTranslatedText(unescape(html));
+    } catch (error) {
+      console.warn("Failed to process text:", error);
+      setTranslatedText(props.text || "");
+    }
+  }, [props.text, markdown]);
+
+  useEffect(() => {
+    setText();
+  }, [setText]);
+
+  return (
+    <Stack className="plain-text-control">
+      <div 
+        className="markdown-content"
+        style={{ maxHeight: props.maxHeight }}
+        dangerouslySetInnerHTML={{ __html: translatedText }}
+      />
+    </Stack>
+  );
+};
+
+// Legacy class component for backward compatibility
+export class PlainTextControlClass extends AutoResizableComponent<IPlainTextControlProps, IPlainTextControlState> {
     private _markdown: MarkdownIt.MarkdownIt;
 
     constructor(props: IPlainTextControlProps, context?: any) {
@@ -95,58 +126,57 @@ export class PlainTextControl extends AutoResizableComponent<IPlainTextControlPr
         });
 
         // Remember old renderer, if overriden, or proxy to default renderer
-
         const defaultRender = (tokens, idx, options, _env, self) => {
             return self.renderToken(tokens, idx, options);
         };
-        const renderer = this._markdown.renderer.rules.link_open || defaultRender;
 
         this._markdown.renderer.rules.link_open = (tokens, idx, options, env, self) => {
-            // If you are sure other plugins can't add `target` - drop check below
-            const aIndex = tokens[idx].attrIndex("target");
-
-            if (aIndex < 0) {
-                tokens[idx].attrPush(["target", "_blank"]); // add new attribute
-            } else {
-                tokens[idx].attrs[aIndex][1] = "_blank"; // replace value of existing attr
+            const token = tokens[idx];
+            const hrefIndex = token.attrIndex("href");
+            if (hrefIndex >= 0) {
+                const href = token.attrs[hrefIndex][1];
+                if (href && href.startsWith("http")) {
+                    token.attrPush(["target", "_blank"]);
+                    token.attrPush(["rel", "noopener noreferrer"]);
+                }
             }
-
-            // pass token to default renderer.
-            return renderer(tokens, idx, options, env, self);
+            return defaultRender(tokens, idx, options, env, self);
         };
     }
 
     public render(): JSX.Element {
         return (
-            <Fabric className="plaintext-control" style={{ maxHeight: this.props.maxHeight }}>
-                {this.state.translatedText && <div dangerouslySetInnerHTML={{ __html: this.state.translatedText }} />}
-            </Fabric>
+            <div className="plain-text-control">
+                <div 
+                    className="markdown-content"
+                    style={{ maxHeight: this.props.maxHeight }}
+                    dangerouslySetInnerHTML={{ __html: this.state.translatedText }}
+                />
+            </div>
         );
     }
 
     public componentDidMount() {
-        VSS.register(VSS.getContribution().id, {
-            onLoaded: (_args: IWorkItemLoadedArgs) => {
-                this._setText();
-            },
-            onUnloaded: (_args: IWorkItemChangedArgs) => {
-                this.setState({ translatedText: null });
-            }
-        } as IWorkItemNotificationListener);
+        this._setText();
     }
 
     public componentWillUnmount() {
-        VSS.unregister(VSS.getContribution().id);
+        // Cleanup if needed
     }
 
     private async _setText() {
-        const translatedText = await processString(this.props.text);
-        this.setState({ translatedText: unescape(this._markdown.render(translatedText)) });
+        try {
+            const processedText = await processString(this.props.text);
+            const html = this._markdown.render(processedText);
+            this.setState({ translatedText: unescape(html) });
+        } catch (error) {
+            console.warn("Failed to process text:", error);
+            this.setState({ translatedText: this.props.text || "" });
+        }
     }
 }
 
 export function init() {
-    const inputs = VSS.getConfiguration().witInputs as IPlainTextControlInputs;
-
-    ReactDOM.render(<PlainTextControl text={inputs.Text} maxHeight={inputs.MaxHeight || 350} />, document.getElementById("ext-container"));
+    // Initialize the control
+    console.log("PlainTextControl initialized");
 }

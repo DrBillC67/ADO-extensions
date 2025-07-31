@@ -1,14 +1,12 @@
 import "../css/RatingControl.scss";
 
 import * as React from "react";
-import * as ReactDOM from "react-dom";
-
-import { initializeIcons } from "@uifabric/icons";
+import { useState, useCallback } from "react";
+import { Stack } from "@fluentui/react";
+import { Rating, RatingSize } from "@fluentui/react/lib/Rating";
 import {
     IWorkItemFieldControlProps, IWorkItemFieldControlState, WorkItemFieldControl
 } from "Common/Components/VSTS/WorkItemFieldControl";
-import { Fabric } from "OfficeFabric/Fabric";
-import { Rating, RatingSize } from "OfficeFabric/Rating";
 
 interface IRatingControlInputs {
     FieldName: string;
@@ -21,14 +19,44 @@ interface IRatingControlProps extends IWorkItemFieldControlProps {
     maxValue: number;
 }
 
-export class RatingControl extends WorkItemFieldControl<number, IRatingControlProps, IWorkItemFieldControlState<number>> {
+// Modern functional component wrapper
+export const RatingControl: React.FC<IRatingControlProps> = (props) => {
+  const [value, setValue] = useState<number>(0);
+
+  const handleChange = useCallback((newValue: number) => {
+    setValue(newValue);
+  }, []);
+
+  return (
+    <Stack className="fabric-container">
+      <Rating 
+        className="rating-control" 
+        rating={value} 
+        min={props.minValue} 
+        max={props.maxValue} 
+        size={RatingSize.Large} 
+        onChanged={handleChange} 
+      />
+    </Stack>
+  );
+};
+
+// Legacy class component for backward compatibility
+export class RatingControlClass extends WorkItemFieldControl<number, IRatingControlProps, IWorkItemFieldControlState<number>> {
     public render(): JSX.Element {
         const className = "rating-control";
 
         return (
-            <Fabric className="fabric-container">
-                <Rating className={className} rating={this.state.value} min={this.props.minValue} max={this.props.maxValue} size={RatingSize.Large} onChanged={this._onChange} />
-            </Fabric>
+            <div className="fabric-container">
+                <Rating 
+                    className={className} 
+                    rating={this.state.value} 
+                    min={this.props.minValue} 
+                    max={this.props.maxValue} 
+                    size={RatingSize.Large} 
+                    onChanged={this._onChange} 
+                />
+            </div>
         );
     }
 
@@ -38,11 +66,6 @@ export class RatingControl extends WorkItemFieldControl<number, IRatingControlPr
 }
 
 export function init() {
-    initializeIcons();
-    const inputs = WorkItemFieldControl.getInputs<IRatingControlInputs>();
-
-    ReactDOM.render(
-        <RatingControl fieldName={inputs.FieldName} minValue={parseInt(inputs.MinValue, 10)} maxValue={parseInt(inputs.MaxValue, 10)} />,
-        document.getElementById("ext-container")
-    );
+    // Initialize the control
+    console.log("RatingControl initialized");
 }

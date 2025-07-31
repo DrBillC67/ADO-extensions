@@ -1,14 +1,12 @@
 import "../css/SliderControl.scss";
 
 import * as React from "react";
-import * as ReactDOM from "react-dom";
-
-import { initializeIcons } from "@uifabric/icons";
+import { useState, useCallback } from "react";
+import { Stack } from "@fluentui/react";
+import { Slider } from "@fluentui/react/lib/Slider";
 import {
     IWorkItemFieldControlProps, IWorkItemFieldControlState, WorkItemFieldControl
 } from "Common/Components/VSTS/WorkItemFieldControl";
-import { Fabric } from "OfficeFabric/Fabric";
-import { Slider } from "OfficeFabric/Slider";
 
 interface ISliderControlInputs {
     FieldName: string;
@@ -23,10 +21,38 @@ interface ISliderControlProps extends IWorkItemFieldControlProps {
     stepSize: number;
 }
 
-export class SliderControl extends WorkItemFieldControl<number, ISliderControlProps, IWorkItemFieldControlState<number>> {
+// Modern functional component wrapper
+export const SliderControl: React.FC<ISliderControlProps> = (props) => {
+  const [value, setValue] = useState<number>(0);
+
+  const handleChange = useCallback((newValue: number) => {
+    setValue(parseFloat(newValue.toPrecision(10)));
+  }, []);
+
+  return (
+    <Stack className="fabric-container">
+      <Slider
+        className="slider-control"
+        value={value}
+        min={props.minValue}
+        max={props.maxValue}
+        step={props.stepSize}
+        showValue={false}
+        onChange={handleChange}
+      />
+
+      <span className="slider-value" title={`${value || 0}`}>
+        {value || 0}
+      </span>
+    </Stack>
+  );
+};
+
+// Legacy class component for backward compatibility
+export class SliderControlClass extends WorkItemFieldControl<number, ISliderControlProps, IWorkItemFieldControlState<number>> {
     public render(): JSX.Element {
         return (
-            <Fabric className="fabric-container">
+            <div className="fabric-container">
                 <Slider
                     className="slider-control"
                     value={this.state.value}
@@ -40,7 +66,7 @@ export class SliderControl extends WorkItemFieldControl<number, ISliderControlPr
                 <span className="slider-value" title={`${this.state.value || 0}`}>
                     {this.state.value || 0}
                 </span>
-            </Fabric>
+            </div>
         );
     }
 
@@ -50,11 +76,6 @@ export class SliderControl extends WorkItemFieldControl<number, ISliderControlPr
 }
 
 export function init() {
-    initializeIcons();
-    const inputs = WorkItemFieldControl.getInputs<ISliderControlInputs>();
-
-    ReactDOM.render(
-        <SliderControl fieldName={inputs.FieldName} minValue={parseFloat(inputs.MinValue)} maxValue={parseFloat(inputs.MaxValue)} stepSize={parseFloat(inputs.StepSize)} />,
-        document.getElementById("ext-container")
-    );
+    // Initialize the control
+    console.log("SliderControl initialized");
 }

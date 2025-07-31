@@ -1,11 +1,11 @@
 import * as React from "react";
 
-import { BasePicker } from "OfficeFabric/components/pickers/BasePicker";
-import { IBasePickerProps } from "OfficeFabric/components/pickers/BasePicker.types";
-import { IPickerItemProps } from "OfficeFabric/components/pickers/PickerItem.types";
-import { TagItem } from "OfficeFabric/components/pickers/TagPicker/TagItem";
-import { ITag } from "OfficeFabric/components/pickers/TagPicker/TagPicker";
-import { css } from "OfficeFabric/Utilities";
+import { BasePicker } from "@fluentui/react/lib/components/pickers/BasePicker";
+import { IBasePickerProps } from "@fluentui/react/lib/components/pickers/BasePicker.types";
+import { IPickerItemProps } from "@fluentui/react/lib/components/pickers/PickerItem.types";
+import { TagItem } from "@fluentui/react/lib/components/pickers/TagPicker/TagItem";
+import { ITag } from "@fluentui/react/lib/components/pickers/TagPicker/TagPicker";
+import { mergeStyles } from "@fluentui/react";
 
 export interface ICustomTagPickerProps extends IBasePickerProps<ITag> {
     suggestionsListClassName?: string;
@@ -17,7 +17,7 @@ export class CustomTagPicker extends BasePicker<ITag, ICustomTagPickerProps> {
         onRenderItem: (props: IPickerItemProps<ITag>) => {
             return <TagItem {...props}>{props.item.name}</TagItem>;
         },
-        onRenderSuggestionsItem: (props: ITag) => <div className={css("ms-TagItem-TextOverflow")}>{props.name}</div>
+        onRenderSuggestionsItem: (props: ITag) => <div className={mergeStyles("ms-TagItem-TextOverflow")}>{props.name}</div>
     };
 
     protected renderSuggestions(): JSX.Element | null {
