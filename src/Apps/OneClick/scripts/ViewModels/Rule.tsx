@@ -31,6 +31,7 @@ export class Rule extends Observable<void> {
     private _updates: { [key: string]: any };
     private _actions: BaseAction[];
     private _triggers: BaseTrigger[];
+    private _changedListeners: Array<() => void> = [];
 
     constructor(model: IRule) {
         super();
@@ -98,89 +99,108 @@ export class Rule extends Observable<void> {
     }
 
     public isValid(): boolean {
-        return (
-            this.updatedModel.name.trim().length > 0 &&
-            this.updatedModel.name.length <= SizeLimits.TitleMaxLength &&
-            this.updatedModel.description.length <= SizeLimits.DescriptionMaxLength &&
-            this._actions.length > 0 &&
-            this._actions.every((a: BaseAction) => a.isValid()) &&
-            this._triggers.every((t: BaseTrigger) => t.isValid())
-        );
+        if (isNullOrEmpty(this.updatedModel.name)) {
+            return false;
+        }
+
+        if (this.updatedModel.name.length > SizeLimits.RuleNameMaxLength) {
+            return false;
+        }
+
+        if (this.updatedModel.description && this.updatedModel.description.length > SizeLimits.RuleDescriptionMaxLength) {
+            return false;
+        }
+
+        if (!this._actions || this._actions.length === 0) {
+            return false;
+        }
+
+        if (!this._triggers || this._triggers.length === 0) {
+            return false;
+        }
+
+        return this._actions.every((a: BaseAction) => a.isValid()) && this._triggers.every((t: BaseTrigger) => t.isValid());
     }
 
-    public setFieldValue<T extends string | boolean | number>(fieldName: RuleFieldNames, fieldValue: T) {
+    public setFieldValue<T extends string | boolean | number>(fieldName: RuleFieldNames, fieldValue: T): void {
         this._updates[fieldName] = fieldValue;
         this._emitChanged();
     }
 
     public getFieldValue<T extends string | boolean | number>(fieldName: RuleFieldNames, original?: boolean): T {
-        return original ? (this._originalModel[fieldName] as T) : (this.updatedModel[fieldName] as T);
-    }
-
-    public addChangedListener(listener: () => void) {
-        this.subscribe(listener);
-    }
-
-    public removeChangedListener(listener: () => void) {
-        this.unsubscribe(listener);
-    }
-
-    public dispose() {
-        this._originalModel = null;
-        this._updates = {};
-        for (const action of this._actions) {
-            action.removeChangedListener(this._emitChanged);
-            action.dispose();
+        if (original) {
+            return this._originalModel[fieldName] as T;
         }
-        for (const trigger of this._triggers) {
-            trigger.removeChangedListener(this._emitChanged);
-            trigger.dispose();
+        return this._updates[fieldName] !== undefined ? this._updates[fieldName] : this._originalModel[fieldName] as T;
+    }
+
+    public addChangedListener(listener: () => void): void {
+        this._changedListeners.push(listener);
+    }
+
+    public removeChangedListener(listener: () => void): void {
+        const index = this._changedListeners.indexOf(listener);
+        if (index > -1) {
+            this._changedListeners.splice(index, 1);
         }
+    }
+
+    public dispose(): void {
+        this._actions.forEach(action => this._unsubscribeFromAction(action));
+        this._triggers.forEach(trigger => this._unsubscribeFromTrigger(trigger));
+        this._changedListeners = [];
+        super.dispose();
     }
 
     public addAction(action: BaseAction): void {
-        this._subscribeToAction(action);
         this._actions.push(action);
+        this._subscribeToAction(action);
         this._emitChanged();
     }
 
     public addTrigger(trigger: BaseTrigger): void {
-        this._subscribeToTrigger(trigger);
         this._triggers.push(trigger);
+        this._subscribeToTrigger(trigger);
         this._emitChanged();
     }
 
     public renderActions(): React.ReactNode {
-        return this._actions.map((action: BaseAction) => {
-            return (
-                <div key={action.id} className="action-container">
-                    <div className="action-header">
-                        <div className="action-name">{action.getFriendlyName()}</div>
-                        <IconButton className="delete-action-command" iconProps={{ iconName: "Trash" }} onClick={this._onRemoveActionButtonClick(action)} />
-                    </div>
-                    <div className="action-properties-list">{action.render(this._originalModel.workItemType)}</div>
+        return this._actions.map((action: BaseAction, index: number) => (
+            <div key={`action-${index}`} className="action-item">
+                <div className="action-content">
+                    {action.render()}
                 </div>
-            );
-        });
+                <div className="action-remove">
+                    <IconButton
+                        iconProps={{ iconName: "Delete" }}
+                        onClick={this._onRemoveActionButtonClick(action)}
+                        title="Remove action"
+                    />
+                </div>
+            </div>
+        ));
     }
 
     public renderTriggers(): React.ReactNode {
-        return this._triggers.map((trigger: BaseTrigger) => {
-            return (
-                <div key={trigger.id} className="action-container">
-                    <div className="action-header">
-                        <div className="action-name">{trigger.getFriendlyName()}</div>
-                        <IconButton className="delete-action-command" iconProps={{ iconName: "Trash" }} onClick={this._onRemoveTriggerButtonClick(trigger)} />
-                    </div>
-                    <div className="action-properties-list">{trigger.render(this._originalModel.workItemType)}</div>
+        return this._triggers.map((trigger: BaseTrigger, index: number) => (
+            <div key={`trigger-${index}`} className="trigger-item">
+                <div className="trigger-content">
+                    {trigger.render()}
                 </div>
-            );
-        });
+                <div className="trigger-remove">
+                    <IconButton
+                        iconProps={{ iconName: "Delete" }}
+                        onClick={this._onRemoveTriggerButtonClick(trigger)}
+                        title="Remove trigger"
+                    />
+                </div>
+            </div>
+        ));
     }
 
     // Returns an array of strings - each string corresponds to an error in action execution
-    public async run(): Promise<IActionError> {
-        let error: IActionError;
+    public async run(): Promise<IActionError | null> {
+        let error: IActionError | null = null;
         if (this.actions == null || this.actions.length === 0) {
             return null;
         }
@@ -203,89 +223,100 @@ export class Rule extends Observable<void> {
 
     // determine if the rule should be run when an event is fired
     public async shouldRunOnEvent(eventName: FormEvents, triggerArgs: any): Promise<boolean> {
-        const result = await Promise.all(this._triggers.map(trigger => this._shouldTriggerFire(eventName, triggerArgs, trigger)));
-        return result.some(trigger => trigger);
+        return this._triggers.some(async (trigger: BaseTrigger) => await this._shouldTriggerFire(eventName, triggerArgs, trigger));
     }
 
     private async _shouldTriggerFire(eventName: FormEvents, triggerArgs: any, trigger: BaseTrigger): Promise<boolean> {
-        if (trigger.getAssociatedFormEvent() !== eventName) {
-            return false;
+        if (trigger.getAssociatedFormEvent() === eventName) {
+            return await trigger.shouldTrigger(triggerArgs);
         }
-
-        return trigger.shouldTrigger(triggerArgs);
+        return false;
     }
 
-    private _removeAction(action: BaseAction) {
-        this._unsubscribeFromAction(action);
-        this._actions = this._actions.filter((a: BaseAction) => !stringEquals(a.id, action.id, true));
-        this._emitChanged();
+    private _removeAction(action: BaseAction): void {
+        const index = this._actions.indexOf(action);
+        if (index > -1) {
+            this._actions.splice(index, 1);
+            this._unsubscribeFromAction(action);
+            this._emitChanged();
+        }
     }
 
-    private _removeTrigger(trigger: BaseTrigger) {
-        this._unsubscribeFromTrigger(trigger);
-        this._triggers = this._triggers.filter((t: BaseTrigger) => !stringEquals(t.id, trigger.id, true));
-        this._emitChanged();
+    private _removeTrigger(trigger: BaseTrigger): void {
+        const index = this._triggers.indexOf(trigger);
+        if (index > -1) {
+            this._triggers.splice(index, 1);
+            this._unsubscribeFromTrigger(trigger);
+            this._emitChanged();
+        }
     }
 
     private _prepareActions(actionModels: IAction[]): BaseAction[] {
-        return actionModels
-            .map(model => {
-                const actionType = getActionType(model.name);
-                if (!actionType) {
-                    return null;
+        const actions: BaseAction[] = [];
+        for (const actionModel of actionModels) {
+            try {
+                const ActionType = getActionType(actionModel.name);
+                if (ActionType) {
+                    const action = new ActionType(actionModel.attributes);
+                    this._subscribeToAction(action);
+                    actions.push(action);
                 }
-
-                const action = new actionType(model);
-                this._subscribeToAction(action);
-                return action;
-            })
-            .filter(a => a != null);
+            } catch (error) {
+                console.error(`Error preparing action ${actionModel.name}:`, error);
+            }
+        }
+        return actions;
     }
 
     private _prepareTriggers(triggerModels: ITrigger[]): BaseTrigger[] {
-        return triggerModels
-            .map(model => {
-                const triggerType = getTriggerType(model.name);
-                if (!triggerType) {
-                    return null;
+        const triggers: BaseTrigger[] = [];
+        for (const triggerModel of triggerModels) {
+            try {
+                const TriggerType = getTriggerType(triggerModel.name);
+                if (TriggerType) {
+                    const trigger = new TriggerType(triggerModel.attributes);
+                    this._subscribeToTrigger(trigger);
+                    triggers.push(trigger);
                 }
-
-                const trigger = new triggerType(model);
-                this._subscribeToTrigger(trigger);
-                return trigger;
-            })
-            .filter(t => t != null);
+            } catch (error) {
+                console.error(`Error preparing trigger ${triggerModel.name}:`, error);
+            }
+        }
+        return triggers;
     }
 
-    private _subscribeToAction(action: BaseAction) {
+    private _subscribeToAction(action: BaseAction): void {
         action.addChangedListener(this._emitChanged);
     }
 
-    private _subscribeToTrigger(trigger: BaseTrigger) {
+    private _subscribeToTrigger(trigger: BaseTrigger): void {
         trigger.addChangedListener(this._emitChanged);
     }
 
-    private _unsubscribeFromAction(action: BaseAction) {
+    private _unsubscribeFromAction(action: BaseAction): void {
         action.removeChangedListener(this._emitChanged);
     }
 
-    private _unsubscribeFromTrigger(trigger: BaseTrigger) {
+    private _unsubscribeFromTrigger(trigger: BaseTrigger): void {
         trigger.removeChangedListener(this._emitChanged);
     }
 
     private _onRemoveActionButtonClick = (action: BaseAction): ((event: React.MouseEvent<HTMLButtonElement>) => void) => {
-        return () => {
+        return (event: React.MouseEvent<HTMLButtonElement>): void => {
+            event.preventDefault();
             this._removeAction(action);
         };
     };
 
     private _onRemoveTriggerButtonClick = (trigger: BaseTrigger): ((event: React.MouseEvent<HTMLButtonElement>) => void) => {
-        return () => {
+        return (event: React.MouseEvent<HTMLButtonElement>): void => {
+            event.preventDefault();
             this._removeTrigger(trigger);
         };
     };
 
-    private _emitChanged = () => {
+    private _emitChanged = (): void => {
+        this._changedListeners.forEach(listener => listener());
         this.notify();
     };
 }

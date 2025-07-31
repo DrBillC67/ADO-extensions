@@ -47,3 +47,47 @@ export async function translateToFieldValue(value: string, fieldType?: WitContra
 export function isAnyMacro(value: string): boolean {
     return stringEquals(value, Constants.AnyMacro, true);
 }
+
+export function validateMacro(macroStr: string): { isValid: boolean; error?: string } {
+    if (!macroStr || !macroStr.startsWith("@")) {
+        return { isValid: false, error: "Macro must start with @" };
+    }
+
+    const macroName = macroStr.split(/[=+-]/)[0].toUpperCase();
+    const supportedMacros = [
+        "@ME", "@TODAY", "@FIELDVALUE", "@ANY",
+        "@CURRENTITERATION", "@STARTOFDAY", "@STARTOFMONTH", "@STARTOFYEAR", "@CURRENTSPRINT"
+    ];
+
+    if (!supportedMacros.includes(macroName)) {
+        return { 
+            isValid: false, 
+            error: `Unsupported macro: ${macroName}. Supported macros: ${supportedMacros.join(", ")}` 
+        };
+    }
+
+    // Validate macro-specific syntax
+    if (macroName === "@FIELDVALUE" && !macroStr.includes("=")) {
+        return { 
+            isValid: false, 
+            error: "@FieldValue macro requires field name after = (e.g., @FieldValue=System.AssignedTo)" 
+        };
+    }
+
+    // Validate arithmetic operators for date macros
+    const dateMacros = ["@TODAY", "@STARTOFDAY", "@STARTOFMONTH", "@STARTOFYEAR"];
+    if (dateMacros.includes(macroName)) {
+        const hasOperator = /[+-]\d+$/.test(macroStr);
+        if (hasOperator) {
+            const operand = macroStr.match(/[+-](\d+)$/)[1];
+            if (isNaN(parseInt(operand))) {
+                return { 
+                    isValid: false, 
+                    error: `Invalid operand in ${macroName} macro. Expected number after + or -` 
+                };
+            }
+        }
+    }
+
+    return { isValid: true };
+}

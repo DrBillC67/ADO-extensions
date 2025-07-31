@@ -5,6 +5,7 @@ import * as ReactDOM from "react-dom";
 
 import { initializeIcons } from "@uifabric/icons";
 import { Loading } from "Common/Components/Loading";
+import { ErrorBoundary } from "Common/Components/ErrorBoundary";
 import {
     BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
 } from "Common/Components/Utilities/BaseFluxComponent";
@@ -17,6 +18,8 @@ import { Fabric } from "OfficeFabric/Fabric";
 import { INavLink, Nav } from "OfficeFabric/Nav";
 import { DirectionalHint, TooltipDelay, TooltipHost } from "OfficeFabric/Tooltip";
 import { WorkItemTypeView } from "OneClick/Components/Settings/WorkItemTypeView";
+import { ExportImportPanel } from "OneClick/Components/Settings/ExportImportPanel";
+import { TemplateLibrary } from "OneClick/Components/Settings/TemplateLibrary";
 import { StoresHub } from "OneClick/Flux/Stores/StoresHub";
 import { initTelemetry, resetSession } from "OneClick/Telemetry";
 import { HostNavigationService } from "VSS/SDK/Services/Navigation";
@@ -24,12 +27,14 @@ import { HostNavigationService } from "VSS/SDK/Services/Navigation";
 export interface IAppState extends IBaseFluxComponentState {
     selectedWit?: string;
     selectedRuleGroupId?: string;
+    showExportImportPanel: boolean;
+    showTemplateLibrary: boolean;
 }
 
 export class SettingsApp extends BaseFluxComponent<IBaseFluxComponentProps, IAppState> {
     private _navigationService: HostNavigationService;
 
-    public componentDidMount() {
+    public componentDidMount(): void {
         super.componentDidMount();
 
         resetSession();
@@ -38,54 +43,100 @@ export class SettingsApp extends BaseFluxComponent<IBaseFluxComponentProps, IApp
         WorkItemTypeActions.initializeWorkItemTypes();
     }
 
-    public componentWillUnmount() {
+    public componentWillUnmount(): void {
         super.componentWillUnmount();
         this._detachNavigate();
     }
 
     public render(): JSX.Element {
         return (
-            <Fabric className="fabric-container">
-                {this.state.loading && <Loading />}
-                {!this.state.loading && (
-                    <div className="container">
-                        <Nav
-                            className="workitemtype-selector-nav"
-                            groups={[
-                                {
-                                    links: this._getWITNavGroups()
-                                }
-                            ]}
-                            onLinkClick={this._onNavLinkClick}
-                            selectedKey={this.state.selectedWit}
-                        />
-
-                        <div className="rule-groups-container">
-                            <WorkItemTypeView workItemTypeName={this.state.selectedWit} ruleGroupId={this.state.selectedRuleGroupId} />
-                        </div>
-                    </div>
-                )}
-                {!this.state.loading && (
-                    <div className="info-button-contaier">
-                        <TooltipHost content={"How to use the extension"} delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomLeftEdge}>
-                            <IconButton
-                                className="info-button"
-                                iconProps={{
-                                    iconName: "InfoSolid"
-                                }}
-                                href={getMarketplaceUrl()}
-                                target="_blank"
+            <ErrorBoundary>
+                <Fabric className="fabric-container">
+                    {this.state.loading && <Loading />}
+                    {!this.state.loading && (
+                        <div className="container">
+                            <Nav
+                                className="workitemtype-selector-nav"
+                                groups={[
+                                    {
+                                        links: this._getWITNavGroups()
+                                    }
+                                ]}
+                                onLinkClick={this._onNavLinkClick}
+                                selectedKey={this.state.selectedWit}
                             />
-                        </TooltipHost>
-                    </div>
-                )}
-            </Fabric>
+
+                            <div className="rule-groups-container">
+                                <ErrorBoundary>
+                                    <WorkItemTypeView 
+                                        workItemTypeName={this.state.selectedWit} 
+                                        ruleGroupId={this.state.selectedRuleGroupId} 
+                                    />
+                                </ErrorBoundary>
+                            </div>
+                        </div>
+                    )}
+                    {!this.state.loading && (
+                        <div className="info-button-contaier">
+                            <TooltipHost content={"Template Library"} delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomLeftEdge}>
+                                <IconButton
+                                    className="info-button"
+                                    iconProps={{
+                                        iconName: "Library"
+                                    }}
+                                    onClick={this._showTemplateLibrary}
+                                />
+                            </TooltipHost>
+                            <TooltipHost content={"Export/Import Settings"} delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomLeftEdge}>
+                                <IconButton
+                                    className="info-button"
+                                    iconProps={{
+                                        iconName: "Download"
+                                    }}
+                                    onClick={this._showExportImportPanel}
+                                />
+                            </TooltipHost>
+                            <TooltipHost content={"How to use the extension"} delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomLeftEdge}>
+                                <IconButton
+                                    className="info-button"
+                                    iconProps={{
+                                        iconName: "InfoSolid"
+                                    }}
+                                    href={getMarketplaceUrl()}
+                                    target="_blank"
+                                />
+                            </TooltipHost>
+                        </div>
+                    )}
+
+                    <ErrorBoundary>
+                        <ExportImportPanel
+                            isOpen={this.state.showExportImportPanel}
+                            onDismiss={this._hideExportImportPanel}
+                            projectId={VSS.getWebContext().project.id}
+                            projectName={VSS.getWebContext().project.name}
+                        />
+                    </ErrorBoundary>
+
+                    <ErrorBoundary>
+                        <TemplateLibrary
+                            isOpen={this.state.showTemplateLibrary}
+                            onDismiss={this._hideTemplateLibrary}
+                            projectId={VSS.getWebContext().project.id}
+                            projectName={VSS.getWebContext().project.name}
+                            onTemplateSelected={this._onTemplateSelected}
+                        />
+                    </ErrorBoundary>
+                </Fabric>
+            </ErrorBoundary>
         );
     }
 
     protected getInitialState(): IAppState {
         return {
-            loading: true
+            loading: true,
+            showExportImportPanel: false,
+            showTemplateLibrary: false
         };
     }
 
@@ -120,12 +171,12 @@ export class SettingsApp extends BaseFluxComponent<IBaseFluxComponentProps, IApp
         return newState;
     }
 
-    private async _attachNavigate() {
+    private async _attachNavigate(): Promise<void> {
         this._navigationService = await getHostNavigationService();
         this._navigationService.attachNavigate(this._onNavigate);
     }
 
-    private _detachNavigate() {
+    private _detachNavigate(): void {
         if (this._navigationService) {
             this._navigationService.detachNavigate(this._onNavigate);
         }
@@ -139,14 +190,14 @@ export class SettingsApp extends BaseFluxComponent<IBaseFluxComponentProps, IApp
         }));
     }
 
-    private _onNavLinkClick = (e: React.MouseEvent<HTMLElement>, link: INavLink) => {
+    private _onNavLinkClick = (e: React.MouseEvent<HTMLElement>, link: INavLink): void => {
         if (!e.ctrlKey) {
             e.preventDefault();
             navigate({ witName: link.key });
         }
     };
 
-    private _onNavigate = async () => {
+    private _onNavigate = async (): Promise<void> => {
         if (this._navigationService) {
             const workItemTypes = StoresHub.workItemTypeStore.getAll();
             const state = await this._navigationService.getCurrentState();
@@ -174,14 +225,37 @@ export class SettingsApp extends BaseFluxComponent<IBaseFluxComponentProps, IApp
             });
         }
     };
+
+    private _showExportImportPanel = (): void => {
+        this.setState({ showExportImportPanel: true });
+    };
+
+    private _hideExportImportPanel = (): void => {
+        this.setState({ showExportImportPanel: false });
+    };
+
+    private _showTemplateLibrary = (): void => {
+        this.setState({ showTemplateLibrary: true });
+    };
+
+    private _hideTemplateLibrary = (): void => {
+        this.setState({ showTemplateLibrary: false });
+    };
+
+    private _onTemplateSelected = (template: any): void => {
+        // Handle template selection - could open import dialog or apply template directly
+        console.log("Template selected:", template);
+    };
 }
 
-export function init() {
+export function init(): void {
     initializeIcons();
 
     const container = document.getElementById("ext-container");
     const spinner = document.getElementById("spinner");
-    container.removeChild(spinner);
+    if (container && spinner) {
+        container.removeChild(spinner);
+    }
 
     ReactDOM.render(<SettingsApp />, container);
 }

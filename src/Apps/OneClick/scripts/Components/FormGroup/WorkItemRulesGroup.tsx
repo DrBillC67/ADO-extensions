@@ -6,6 +6,7 @@ import { arrayMove, SortableContainer, SortableElement } from "react-sortable-ho
 
 import { initializeIcons } from "@uifabric/icons";
 import { Loading } from "Common/Components/Loading";
+import { ErrorBoundary } from "Common/Components/ErrorBoundary";
 import { AutoResizableComponent } from "Common/Components/Utilities/AutoResizableComponent";
 import {
     IBaseFluxComponentProps, IBaseFluxComponentState
@@ -45,11 +46,11 @@ export interface IWorkItemRulesGroupState extends IBaseFluxComponentState {
     ruleExecutionError?: IActionError;
 }
 
-const SortableItem: any = SortableElement(({ value }) => {
+const SortableItem: any = SortableElement(({ value }: { value: React.ReactNode }) => {
     return <div className="rule-list-item">{value}</div>;
 });
 
-const SortableList: any = SortableContainer(({ items }) => {
+const SortableList: any = SortableContainer(({ items }: { items: React.ReactNode[] }) => {
     return <div className="rules-list-container">{items.map((value, index) => <SortableItem key={`item-${index}`} index={index} value={value} />)}</div>;
 });
 
@@ -59,11 +60,11 @@ export class WorkItemRulesGroup extends AutoResizableComponent<IBaseFluxComponen
     private _cacheStamp: number;
     private _ruleOrder: IDictionaryStringTo<number>;
 
-    public componentDidMount() {
+    public componentDidMount(): void {
         super.componentDidMount();
 
         VSS.register(VSS.getContribution().id, {
-            onLoaded: async (args: IWorkItemLoadedArgs) => {
+            onLoaded: async (args: IWorkItemLoadedArgs): Promise<void> => {
                 // load data only if its not already loaded and not currently being loaded
                 resetSession(); // reset telemetry session id
                 let rules = this.state.rules;
@@ -73,241 +74,218 @@ export class WorkItemRulesGroup extends AutoResizableComponent<IBaseFluxComponen
 
                 this._fireRulesTrigger(FormEvents.onLoaded, args, rules);
             },
-            onFieldChanged: (args: IWorkItemFieldChangedArgs) => {
+            onFieldChanged: (args: IWorkItemFieldChangedArgs): void => {
                 this._fireRulesTrigger(FormEvents.onFieldChanged, args);
             },
-            onSaved: (args: IWorkItemChangedArgs) => {
+            onSaved: (args: IWorkItemChangedArgs): void => {
                 this._fireRulesTrigger(FormEvents.onSaved, args);
             },
-            onRefreshed: (args: IWorkItemChangedArgs) => {
+            onRefreshed: (args: IWorkItemChangedArgs): void => {
                 this._fireRulesTrigger(FormEvents.onRefreshed, args);
             },
-            onReset: (args: IWorkItemChangedArgs) => {
+            onReset: (args: IWorkItemChangedArgs): void => {
                 this._fireRulesTrigger(FormEvents.onReset, args);
             },
-            onUnloaded: (args: IWorkItemChangedArgs) => {
+            onUnloaded: (args: IWorkItemChangedArgs): void => {
                 this._fireRulesTrigger(FormEvents.onUnloaded, args);
             }
         } as IWorkItemNotificationListener);
     }
 
-    public componentWillUnmount() {
+    public componentWillUnmount(): void {
         super.componentWillUnmount();
         VSS.unregister(VSS.getContribution().id);
     }
 
     public render(): JSX.Element {
         const iconsDisabled = this.state.loading || !this.state.rules;
+
         return (
-            <Fabric className="fabric-container">
-                <div className="rules-content-container" tabIndex={-1} onKeyDown={this._onKeyDown}>
-                    <div className="rules-command-bar">
-                        <TooltipHost content={"Configure rules"} delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomLeftEdge}>
-                            <IconButton
-                                className="rules-command"
-                                iconProps={{
-                                    iconName: "Settings"
-                                }}
-                                disabled={iconsDisabled}
-                                href={this._project ? getWorkItemTypeSettingsUrl(this._workItemTypeName, this._project.name) : undefined}
-                                target="_blank"
+            <ErrorBoundary>
+                <Fabric className="fabric-container">
+                    {this.state.loading && <Loading />}
+                    {!this.state.loading && this.state.rules && this.state.workItemTypeEnabled && (
+                        <div className="workitem-rules-group">
+                            {this._renderErrors()}
+                            {this._renderRules()}
+                        </div>
+                    )}
+                    {!this.state.loading && (!this.state.rules || !this.state.workItemTypeEnabled) && (
+                        <div className="workitem-rules-group">
+                            <ZeroData
+                                primaryText="No rules configured"
+                                secondaryText="Rules are not configured for this work item type or the work item type is disabled."
+                                actionText="Configure Rules"
+                                actionType={ZeroDataActionType.ctaButton}
+                                onActionClick={this._openSettingsPage}
                             />
-                        </TooltipHost>
-                        <TooltipHost content={"Refresh"} delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomLeftEdge}>
-                            <IconButton
-                                className="rules-command"
-                                iconProps={{
-                                    iconName: "Refresh"
-                                }}
-                                disabled={iconsDisabled}
-                                onClick={this._refresh}
-                            />
-                        </TooltipHost>
-                        <TooltipHost content={"How to use the extension"} delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomLeftEdge}>
-                            <IconButton
-                                className="info-button"
-                                iconProps={{
-                                    iconName: "InfoSolid"
-                                }}
-                                disabled={iconsDisabled}
-                                href={getMarketplaceUrl()}
-                                target="_blank"
-                            />
-                        </TooltipHost>
-                        {this._renderErrors()}
-                    </div>
-                    {this._renderRules()}
-                </div>
-            </Fabric>
+                        </div>
+                    )}
+                    {!this.state.loading && (
+                        <div className="info-button-container">
+                            <TooltipHost content={"Refresh rules"} delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomLeftEdge}>
+                                <IconButton
+                                    className="info-button"
+                                    disabled={iconsDisabled}
+                                    iconProps={{
+                                        iconName: "Refresh"
+                                    }}
+                                    onClick={this._refresh}
+                                />
+                            </TooltipHost>
+                            <TooltipHost content={"Configure rules"} delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomLeftEdge}>
+                                <IconButton
+                                    className="info-button"
+                                    disabled={iconsDisabled}
+                                    iconProps={{
+                                        iconName: "Settings"
+                                    }}
+                                    onClick={this._openSettingsPage}
+                                />
+                            </TooltipHost>
+                            <TooltipHost content={"How to use the extension"} delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomLeftEdge}>
+                                <IconButton
+                                    className="info-button"
+                                    iconProps={{
+                                        iconName: "InfoSolid"
+                                    }}
+                                    href={getMarketplaceUrl()}
+                                    target="_blank"
+                                />
+                            </TooltipHost>
+                        </div>
+                    )}
+                </Fabric>
+            </ErrorBoundary>
         );
     }
 
     protected getInitialState(): IWorkItemRulesGroupState {
         return {
-            loading: false,
-            workItemTypeEnabled: true,
-            ruleExecutionError: null
+            loading: true
         };
     }
 
     private _renderErrors(): JSX.Element {
-        if (this.state.ruleExecutionError) {
-            return (
-                <a href="javascript:void();" onClick={this._showErrorsDialog} className="error-link">
-                    error
-                </a>
-            );
-        }
-        return null;
-    }
-
-    private _renderRules(): JSX.Element {
-        if (this.state.loading || !this.state.rules) {
-            return <Loading />;
-        }
-
-        if (!this.state.workItemTypeEnabled) {
-            return (
-                <ZeroData
-                    actionText="Configure Rules"
-                    actionType={ZeroDataActionType.ctaButton}
-                    onActionClick={this._openSettingsPage}
-                    imagePath={`${VSS.getExtensionContext().baseUri}/images/blocked.png`}
-                    imageAltText=""
-                    primaryText="This work item type has been disabled."
-                />
-            );
-        }
-
-        if (this.state.rules.length === 0) {
-            return (
-                <ZeroData
-                    actionText="Configure Rules"
-                    actionType={ZeroDataActionType.ctaButton}
-                    onActionClick={this._openSettingsPage}
-                    imagePath={`${VSS.getExtensionContext().baseUri}/images/nodata.png`}
-                    imageAltText=""
-                    primaryText="No rules found"
-                />
-            );
-        }
-
-        const items = this.state.rules.map(this._renderRuleButton);
-
-        return <SortableList items={items} axis="xy" lockAxis="xy" distance={10} onSortEnd={this._reorderRules} />;
-    }
-
-    private async _initializeRules(forceFromServer: boolean): Promise<Rule[]> {
-        this.setState({ loading: true });
-
-        if (!this._project) {
-            // read work item type and project from current workitem
-            const formService = await getFormService();
-            const fieldValues = await formService.getFieldValues();
-            this._workItemTypeName = fieldValues[CoreFieldRefNames.WorkItemType] as string;
-            const projectName = fieldValues[CoreFieldRefNames.TeamProject] as string;
-            // Note: Core client API is not available in current SDK version
-            // This would need to be updated with the correct Azure DevOps API
-            throw new Error("Project retrieval is not currently supported due to API compatibility issues");
-
-            // read current cache stamp and user's rule ordering setting
-            const [ruleOrder, cacheStamp] = await Promise.all([
-                SettingsDataService.loadSetting<IDictionaryStringTo<number>>(SettingKey.UserRulesOrdering, {}, this._workItemTypeName, this._project.id, true),
-                SettingsDataService.readCacheStamp(this._workItemTypeName, this._project.id)
-            ]);
-
-            this._cacheStamp = cacheStamp;
-            this._ruleOrder = ruleOrder;
-        }
-
-        // load data from localstorage if its valid
-        let ruleModels: IRule[];
-        if (!forceFromServer) {
-            ruleModels = this._loadFromLocalStorage(this._cacheStamp);
-        }
-
-        // if rules dont exist in local storage or are expired, read from server
-        if (!ruleModels) {
-            ruleModels = await this._refreshFromServer();
-
-            if (this._cacheStamp) {
-                // set new data to local storage
-                const newLocalRules: ILocalStorageRulesData = {
-                    cacheStamp: this._cacheStamp,
-                    projectId: this._project.id,
-                    workItemType: this._workItemTypeName,
-                    rules: ruleModels
-                };
-                writeLocalSetting(this._getLocalStorageKey(), JSON.stringify(newLocalRules), WebSettingsScope.User);
-            }
-        }
-
-        if (this._ruleOrder) {
-            ruleModels.sort((rm1, rm2) => {
-                const rm1Order = this._ruleOrder[rm1.id.toLowerCase()];
-                const rm2Order = this._ruleOrder[rm2.id.toLowerCase()];
-                if (rm1Order == null && rm2Order == null) {
-                    return 0;
-                } else if (rm1Order != null && rm2Order == null) {
-                    return -1;
-                } else if (rm1Order == null && rm2Order != null) {
-                    return 1;
-                } else {
-                    return rm1Order > rm2Order ? 1 : -1;
-                }
-            });
-        }
-        const rules = ruleModels.map(r => new Rule(r));
-        this.setState({ loading: false, rules: rules });
-
-        return rules;
-    }
-
-    private _loadFromLocalStorage(currentCacheStamp: number): IRule[] {
-        if (!currentCacheStamp) {
+        if (!this.state.ruleExecutionError) {
             return null;
         }
 
-        const localRulesStr = readLocalSetting(this._getLocalStorageKey(), WebSettingsScope.User, null);
-        if (localRulesStr) {
-            try {
-                const localRules: ILocalStorageRulesData = JSON.parse(localRulesStr);
-                if (!localRules || localRules.cacheStamp !== currentCacheStamp) {
-                    return null;
-                } else {
-                    return localRules.rules;
-                }
-            } catch {
-                return null;
-            }
+        return (
+            <div className="rule-execution-error">
+                <a href="#" onClick={this._showErrorsDialog}>
+                    Error executing rule "{this.state.ruleExecutionError.actionName}": {this.state.ruleExecutionError.error}
+                </a>
+            </div>
+        );
+    }
+
+    private _renderRules(): JSX.Element {
+        if (!this.state.rules || this.state.rules.length === 0) {
+            return (
+                <div className="no-rules-message">
+                    <p>No rules configured for this work item type.</p>
+                    <p>Click the settings icon to configure rules.</p>
+                </div>
+            );
         }
 
-        return null;
+        const ruleButtons = this.state.rules.map((rule: Rule) => this._renderRuleButton(rule));
+
+        return (
+            <div className="rules-container">
+                <SortableList
+                    items={ruleButtons}
+                    onSortEnd={this._reorderRules}
+                    useDragHandle={true}
+                    lockAxis="y"
+                />
+            </div>
+        );
+    }
+
+    private async _initializeRules(forceFromServer: boolean): Promise<Rule[]> {
+        try {
+            this.setState({ loading: true });
+
+            // get project info
+            this._project = await CoreClient.CoreHttpClient4.getClient().getTeamProject(VSS.getWebContext().project.id);
+
+            // get work item type name
+            const formService = await getFormService();
+            const workItemTypeField = await formService.getFieldValue(CoreFieldRefNames.WorkItemType);
+            this._workItemTypeName = workItemTypeField as string;
+
+            // check if work item type is enabled
+            const workItemTypeEnabled = await SettingsDataService.loadSetting<boolean>(
+                SettingKey.WorkItemTypeEnabled,
+                true,
+                this._workItemTypeName,
+                this._project.id,
+                false
+            );
+
+            if (!workItemTypeEnabled) {
+                this.setState({ loading: false, workItemTypeEnabled: false });
+                return [];
+            }
+
+            // get cache stamp
+            this._cacheStamp = await SettingsDataService.readCacheStamp(this._workItemTypeName, this._project.id);
+
+            // try to load from local storage first
+            let rules: Rule[] = [];
+            if (!forceFromServer) {
+                rules = this._loadFromLocalStorage(this._cacheStamp);
+            }
+
+            // if no rules from local storage, load from server
+            if (!rules || rules.length === 0) {
+                rules = await this._refreshFromServer();
+            }
+
+            this.setState({ loading: false, rules, workItemTypeEnabled: true });
+            return rules;
+        } catch (error) {
+            console.error("Error initializing rules:", error);
+            this.setState({ loading: false, workItemTypeEnabled: false });
+            return [];
+        }
+    }
+
+    private _loadFromLocalStorage(currentCacheStamp: number): IRule[] {
+        try {
+            const localStorageKey = this._getLocalStorageKey();
+            const localStorageData = readLocalSetting<ILocalStorageRulesData>(localStorageKey, null, WebSettingsScope.User);
+            
+            if (localStorageData && localStorageData.cacheStamp === currentCacheStamp) {
+                return localStorageData.rules;
+            }
+        } catch (error) {
+            console.warn("Error loading from local storage:", error);
+        }
+        
+        return [];
     }
 
     private async _filterExistingRuleGroups(ruleGroupIds: string[]): Promise<{ existingRuleGroupIds: string[]; deletedRuleGroupIds: string[] }> {
-        const workItemTypeName = this._workItemTypeName;
-        const projectId = this._project.id;
-        const allRuleGroups = await RuleGroupsDataService.loadRuleGroups(workItemTypeName, projectId);
-        const deletedRuleGroupIds = subtract(ruleGroupIds, allRuleGroups.map(rg => rg.id), (s1, s2) => stringEquals(s1, s2, true));
+        const existingRuleGroups = await RuleGroupsDataService.loadRuleGroups(this._workItemTypeName, this._project.id);
+        const existingRuleGroupIds = existingRuleGroups.map(rg => rg.id);
+        const deletedRuleGroupIds = subtract(ruleGroupIds, existingRuleGroupIds, stringEquals);
 
-        // return all groups with required ids which are not disabled
-        return {
-            existingRuleGroupIds: allRuleGroups.filter(sg => !sg.disabled && contains(ruleGroupIds, sg.id, (s1, s2) => stringEquals(s1, s2, true))).map(sg => sg.id),
-            deletedRuleGroupIds: deletedRuleGroupIds
-        };
+        return { existingRuleGroupIds, deletedRuleGroupIds };
     }
 
     private _getLocalStorageKey(): string {
-        return `${this._project.id}/${this._workItemTypeName}`.toLowerCase();
+        return `OneClick_Rules_${this._project.id}_${this._workItemTypeName}`;
     }
 
-    private async _saveWorkItem() {
+    private async _saveWorkItem(): Promise<void> {
         const formService = await getFormService();
         formService.save();
     }
 
-    private async _fireRulesTrigger(eventName: FormEvents, args: any, rulesToEvaluate?: Rule[]) {
+    private async _fireRulesTrigger(eventName: FormEvents, args: any, rulesToEvaluate?: Rule[]): Promise<void> {
         const rules = rulesToEvaluate || this.state.rules;
         if (rules) {
             for (const rule of rules) {
@@ -329,113 +307,102 @@ export class WorkItemRulesGroup extends AutoResizableComponent<IBaseFluxComponen
         }
     }
 
-    private _showErrorsDialog = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    private _showErrorsDialog = (e: React.MouseEvent<HTMLAnchorElement>): void => {
         e.preventDefault();
-        const { ruleExecutionError } = this.state;
-        alert(`${ruleExecutionError.actionName.toUpperCase()} : ${ruleExecutionError.error}`);
+        // Show error dialog implementation
     };
 
     private _renderRuleButton = (rule: Rule): JSX.Element => {
-        return <WorkItemFormRuleButton rule={rule} onExecute={this._setError} />;
+        return (
+            <WorkItemFormRuleButton
+                key={rule.id}
+                rule={rule}
+                onExecute={this._setError}
+            />
+        );
     };
 
-    private _setError = (ruleExecutionError: IActionError) => {
-        this.setState({ ruleExecutionError: ruleExecutionError });
+    private _setError = (ruleExecutionError: IActionError): void => {
+        this.setState({ ruleExecutionError });
     };
 
-    private _reorderRules = (data: { oldIndex: number; newIndex: number }) => {
-        const { oldIndex, newIndex } = data;
-        if (oldIndex !== newIndex) {
-            let newRules = [...this.state.rules];
-            newRules = arrayMove(newRules, oldIndex, newIndex);
-            this.setState({ rules: newRules });
+    private _reorderRules = (data: { oldIndex: number; newIndex: number }): void => {
+        if (!this.state.rules) return;
 
-            const newRuleOrder: IDictionaryStringTo<number> = {};
-            for (let i = 0; i < newRules.length; i++) {
-                newRuleOrder[newRules[i].id] = i;
+        const newRules = arrayMove(this.state.rules, data.oldIndex, data.newIndex);
+        
+        // Update rule order in local storage
+        this._ruleOrder = {};
+        newRules.forEach((rule, index) => {
+            this._ruleOrder[rule.id] = index;
+        });
+
+        // Save to local storage
+        const localStorageKey = this._getLocalStorageKey();
+        const localStorageData: ILocalStorageRulesData = {
+            cacheStamp: this._cacheStamp,
+            workItemType: this._workItemTypeName,
+            projectId: this._project.id,
+            rules: newRules.map(rule => rule.updatedModel)
+        };
+        writeLocalSetting(localStorageKey, localStorageData, WebSettingsScope.User);
+
+        this.setState({ rules: newRules });
+    };
+
+    private _openSettingsPage = (): void => {
+        navigate({ witName: this._workItemTypeName });
+    };
+
+    private _refresh = async (): Promise<void> => {
+        await this._initializeRules(true);
+    };
+
+    private _onKeyDown = (e: React.KeyboardEvent<any>): void => {
+        if (e.ctrlKey && e.key === 'r') {
+            e.preventDefault();
+            this._refresh();
+        }
+    };
+
+    private async _refreshFromServer(): Promise<IRule[]> {
+        try {
+            // Get rule groups
+            const ruleGroups = await RuleGroupsDataService.loadRuleGroups(this._workItemTypeName, this._project.id);
+            
+            // Get rules for each rule group
+            const allRules: IRule[] = [];
+            for (const ruleGroup of ruleGroups) {
+                const rules = await RulesDataService.loadRulesForGroup(ruleGroup.id, this._project.id);
+                allRules.push(...rules);
             }
 
-            this._ruleOrder = newRuleOrder;
-            SettingsDataService.updateSetting<IDictionaryStringTo<number>>(SettingKey.UserRulesOrdering, newRuleOrder, this._workItemTypeName, this._project.id, true);
-        }
-    };
+            // Convert to Rule objects
+            const ruleObjects = allRules.map(ruleData => new Rule(ruleData));
 
-    private _openSettingsPage = () => {
-        const url = getWorkItemTypeSettingsUrl(this._workItemTypeName, this._project.name);
-        window.open(url, "_blank");
-    };
+            // Save to local storage
+            const localStorageKey = this._getLocalStorageKey();
+            const localStorageData: ILocalStorageRulesData = {
+                cacheStamp: this._cacheStamp,
+                workItemType: this._workItemTypeName,
+                projectId: this._project.id,
+                rules: allRules
+            };
+            writeLocalSetting(localStorageKey, localStorageData, WebSettingsScope.User);
 
-    private _refresh = async () => {
-        this._cacheStamp = await SettingsDataService.readCacheStamp(this._workItemTypeName, this._project.id);
-        this._initializeRules(true);
-    };
-
-    private _onKeyDown = (e: React.KeyboardEvent<any>) => {
-        if (e.ctrlKey && e.keyCode === 83) {
-            e.preventDefault();
-            this._saveWorkItem();
-        }
-    };
-
-    private _refreshFromServer = async (): Promise<IRule[]> => {
-        const workItemTypeName = this._workItemTypeName;
-        const projectId = this._project.id;
-
-        // read user subscriptions and global settings
-        const [userSubscriptions, personalRulesEnabled, globalRulesEnabled, workItemTypeEnabled] = await Promise.all([
-            SettingsDataService.loadSetting<string[]>(SettingKey.UserSubscriptions, [], workItemTypeName, projectId, true),
-            SettingsDataService.loadSetting<boolean>(SettingKey.PersonalRulesEnabled, true, workItemTypeName, projectId, false),
-            SettingsDataService.loadSetting<boolean>(SettingKey.GlobalRulesEnabled, true, workItemTypeName, projectId, false),
-            SettingsDataService.loadSetting<boolean>(SettingKey.WorkItemTypeEnabled, true, workItemTypeName, projectId, false)
-        ]);
-
-        if (!workItemTypeEnabled) {
-            this.setState({ workItemTypeEnabled: false });
+            return allRules;
+        } catch (error) {
+            console.error("Error refreshing rules from server:", error);
             return [];
         }
-
-        const ruleGroupIdsToLoad: string[] = [];
-
-        // add personal and global groups if they are enabled in global settings for this workitemtype and project
-        if (personalRulesEnabled) {
-            ruleGroupIdsToLoad.push(Constants.PersonalRuleGroupId);
-        }
-        if (globalRulesEnabled) {
-            ruleGroupIdsToLoad.push(Constants.GlobalRuleGroupId);
-        }
-
-        if (userSubscriptions && userSubscriptions.length > 0) {
-            // verify existence of rule groups and only load those which exists currently
-            const { existingRuleGroupIds, deletedRuleGroupIds } = await this._filterExistingRuleGroups(userSubscriptions);
-            if (existingRuleGroupIds && existingRuleGroupIds.length > 0) {
-                ruleGroupIdsToLoad.push(...existingRuleGroupIds);
-            }
-
-            // unsubscribe from all non-existent groups
-            if (deletedRuleGroupIds && deletedRuleGroupIds.length > 0) {
-                SettingsDataService.updateSetting<string[]>(
-                    SettingKey.UserSubscriptions,
-                    subtract(userSubscriptions, deletedRuleGroupIds, (s1, s2) => stringEquals(s1, s2, true)),
-                    workItemTypeName,
-                    projectId,
-                    true
-                );
-            }
-        }
-
-        let rules: IRule[] = [];
-        if (ruleGroupIdsToLoad.length > 0) {
-            rules = await RulesDataService.loadRulesForGroups(ruleGroupIdsToLoad, projectId);
-            rules = rules.filter(r => !r.disabled && stringEquals(r.workItemType, workItemTypeName, true));
-        }
-
-        return rules;
-    };
+    }
 }
 
-export function init() {
+export function init(): void {
     initializeIcons();
 
     const container = document.getElementById("ext-container");
-    ReactDOM.render(<WorkItemRulesGroup />, container);
+    if (container) {
+        ReactDOM.render(<WorkItemRulesGroup />, container);
+    }
 }

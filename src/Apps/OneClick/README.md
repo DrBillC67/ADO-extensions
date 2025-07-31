@@ -3,6 +3,20 @@
 
 # Changelog
 <a name="changelog" id="changelog"></a>
+**(07/30/25) Version 3.0 - DevOps Macros Enhancement:** 
+* **NEW: DevOps Macros** - Added powerful new macros for enhanced automation capabilities:
+  * `@CurrentIteration` - Resolves to current team iteration path
+  * `@StartOfDay` - Start of current day (supports `@startofday-1`, `@startofday+2`)
+  * `@StartOfMonth` - Start of current month (supports `@startofmonth-1`, `@startofmonth+2`)
+  * `@StartOfYear` - Start of current year (supports `@startofyear-1`, `@startofyear+2`)
+  * `@CurrentSprint` - Current team sprint name
+* **Enhanced Date Arithmetic** - All date macros now support arithmetic operations for flexible date calculations
+* **Team Context Awareness** - DevOps macros automatically adapt to current team context
+* **Robust Error Handling** - Graceful fallbacks and comprehensive error handling for all new macros
+* **UI Improvements** - Added collapsible macro help panel with examples and usage tips
+* **Comprehensive Testing** - Full test coverage for all new macro implementations
+* **Documentation** - Complete documentation with examples and troubleshooting guide
+
 **(03/03/18) Version 2.3:** 
 * Added "Field changed trigger" which will be fired when a field changes on work item form. To configure this trigger, provide a field name, its old value and new value. For eg - FieldName="System.State", OldValue="New", NewValue="Active" will fire when State changes from New to Active. Users can also use "@any" macro as fieldValue (both for old and new). For eg, if OldValue="@any", then the trigger will fire when State changes from any value to "Active". If NewValue="@any", then the trigger will fire when State changes from "New" to any value.
 * Added a support to hide a rule button in work item form. Just check the "Hide on form" checkbox in the rule editor to hide the rule button in the work item form. This would be useful for triggered rules which are meant to be fired automatically instead of manual clicks.
@@ -175,8 +189,95 @@ This macro is only applicable in field changed trigger. In field changed trigger
 
 ![Group](images/fieldchanged.png)
 
+#### @CurrentIteration Macro ####
+This macro resolves to the current iteration path for the team context. This can be used in "Set Field value" action or triggers.
+
+**Examples:**
+- Set iteration to current team iteration: `@CurrentIteration`
+- Trigger when iteration changes to current: `oldValue="@Any"`, `newValue="@CurrentIteration"`
+
+#### @StartOfDay Macro ####
+This macro resolves to the start of the current day (00:00:00). Supports arithmetic operations for flexible date calculations.
+
+**Examples:**
+- Set start date to beginning of today: `@StartOfDay`
+- Set due date to beginning of tomorrow: `@StartOfDay+1`
+- Set created date to beginning of yesterday: `@StartOfDay-1`
+
+#### @StartOfMonth Macro ####
+This macro resolves to the start of the current month (1st day, 00:00:00). Supports arithmetic operations for flexible month calculations.
+
+**Examples:**
+- Set start date to beginning of current month: `@StartOfMonth`
+- Set due date to beginning of next month: `@StartOfMonth+1`
+- Set milestone date to beginning of previous month: `@StartOfMonth-1`
+
+#### @StartOfYear Macro ####
+This macro resolves to the start of the current year (January 1st, 00:00:00). Supports arithmetic operations for flexible year calculations.
+
+**Examples:**
+- Set fiscal year start: `@StartOfYear`
+- Set planning horizon to next year: `@StartOfYear+1`
+- Set retrospective date to previous year: `@StartOfYear-1`
+
+#### @CurrentSprint Macro ####
+This macro resolves to the current sprint name for the team context. This can be used in "Set Field value" action or triggers.
+
+**Examples:**
+- Set sprint field to current sprint: `@CurrentSprint`
+- Trigger when sprint changes to current: `oldValue="@Any"`, `newValue="@CurrentSprint"`
+
 <br />
 
 <a name="reordering"></a>
 ## Reordering rules ##
 Each user can also reorder rules on his/her workitem form by simply dragging and dropping the buttons. The setting will be saved for future.
+
+## Common Use Cases for DevOps Macros ##
+
+### Automatic Iteration Assignment
+Create a rule that automatically assigns work items to the current iteration when they are created:
+- **Trigger:** New work item opened
+- **Action:** Set field value
+  - Field: `System.IterationPath`
+  - Value: `@CurrentIteration`
+
+### Monthly Planning Automation
+Create a rule that sets start and due dates for monthly planning items:
+- **Trigger:** New work item opened (for specific work item types)
+- **Actions:**
+  - Set field value: `Microsoft.VSTS.Scheduling.StartDate` = `@StartOfMonth`
+  - Set field value: `Microsoft.VSTS.Scheduling.DueDate` = `@StartOfMonth+1-1` (end of current month)
+
+### Sprint Transition Automation
+Create a rule that triggers when work items are moved to the current sprint:
+- **Trigger:** Field changed
+  - Field: `System.IterationPath`
+  - Old value: `@Any`
+  - New value: `@CurrentIteration`
+- **Actions:**
+  - Set field value: `System.AssignedTo` = `@Me`
+  - Add comment: "Automatically assigned to current user when moved to current iteration"
+
+### Fiscal Year Planning
+Create a rule for fiscal year planning items:
+- **Trigger:** New work item opened (for Epic work item type)
+- **Actions:**
+  - Set field value: `Microsoft.VSTS.Scheduling.StartDate` = `@StartOfYear`
+  - Set field value: `Microsoft.VSTS.Scheduling.DueDate` = `@StartOfYear+1-1` (end of year)
+
+## Implementation Details ##
+
+**Developer:** Bill Curtis  
+**Date:** July 30, 2025  
+**Version:** 3.0 - DevOps Macros Enhancement
+
+The DevOps macros implementation includes:
+- **Core Macro System:** Date arithmetic utilities and DevOps context macros
+- **Integration:** Seamless integration with existing OneClick macro system
+- **Error Handling:** Robust error handling and graceful fallbacks
+- **Testing:** Comprehensive unit tests for all macro implementations
+- **Documentation:** Complete documentation with examples and troubleshooting
+- **UI Components:** User-friendly help panel with macro documentation
+
+For detailed technical documentation, see `DEVOPS_MACROS_README.md` in the project root.

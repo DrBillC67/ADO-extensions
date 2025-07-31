@@ -78,6 +78,26 @@ export namespace Constants {
     export const AnyMacro = "@any";
 }
 
+export namespace DevOpsMacros {
+    export const CurrentIteration = "@CurrentIteration";
+    export const StartOfDay = "@StartOfDay";
+    export const StartOfMonth = "@StartOfMonth";
+    export const StartOfYear = "@StartOfYear";
+    export const CurrentSprint = "@CurrentSprint";
+}
+
+export const SupportedMacros = [
+    "@Me",
+    "@Today", 
+    "@FieldValue",
+    "@Any",
+    "@CurrentIteration",
+    "@StartOfDay",
+    "@StartOfMonth", 
+    "@StartOfYear",
+    "@CurrentSprint"
+];
+
 export namespace SizeLimits {
     export const TitleMaxLength = 128;
     export const DescriptionMaxLength = 512;

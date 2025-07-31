@@ -35,7 +35,7 @@ import { FilterBar, IFilterBar, KeywordFilterBarItem } from "VSSUI/Components/Fi
 import { Hub } from "VSSUI/Components/Hub";
 import { HubHeader } from "VSSUI/Components/HubHeader";
 import { IPivotBarAction, IPivotBarViewAction, PivotBarItem } from "VSSUI/Components/PivotBar";
-import { IconToggleButton } from "VSSUI/IconToggleButton";
+// import { IconToggleButton } from "VSSUI/IconToggleButton";
 import { FILTER_CHANGE_EVENT, IFilterState } from "VSSUI/Utilities/Filter";
 import { HubViewState, IHubViewState } from "VSSUI/Utilities/HubViewState";
 import { VssDetailsList } from "VSSUI/VssDetailsList";
@@ -410,20 +410,15 @@ export class RuleGroupList extends BaseFluxComponent<IRuleGroupListProps, IRuleG
                     <TooltipHost content={iconTooltip} delay={TooltipDelay.medium} directionalHint={DirectionalHint.bottomAutoEdge}>
                         {isPersonalOrGlobalRuleGroup(ruleGroup) && <VssIcon iconType={VssIconType.Fabric} iconName="Info" className="rule-group-info-icon" />}
                         {!isPersonalOrGlobalRuleGroup(ruleGroup) && (
-                            <IconToggleButton
-                                iconName="FavoriteStar"
-                                toggledOnIconProps={{
-                                    iconName: "FavoriteStarFill",
-                                    iconType: VssIconType.Fabric,
-                                    style: { color: "#ffbe00", fontSize: "14px" }
+                            <VssIcon
+                                iconName={isSubscribed ? "FavoriteStarFill" : "FavoriteStar"}
+                                iconType={VssIconType.Fabric}
+                                style={{ 
+                                    color: isSubscribed ? "#ffbe00" : "inherit", 
+                                    fontSize: "14px",
+                                    cursor: "pointer"
                                 }}
-                                toggledOffIconProps={{
-                                    iconName: "FavoriteStar",
-                                    iconType: VssIconType.Fabric,
-                                    style: { fontSize: "14px" }
-                                }}
-                                isToggledOn={isSubscribed}
-                                onToggle={delegate(this, this._toggleSubscription, ruleGroup)}
+                                onClick={() => this._toggleSubscription(!isSubscribed, ruleGroup)}
                                 className="rule-group-subscribe-command"
                             />
                         )}

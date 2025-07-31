@@ -15,14 +15,14 @@ import { isAnyMacro, translateToFieldValue } from "OneClick/Helpers";
 import { BaseMacro } from "OneClick/Macros/Macros";
 import { BaseTrigger } from "OneClick/RuleTriggers/BaseTrigger";
 import { FieldType } from "TFS/WorkItemTracking/Contracts";
-import { IWorkItemFieldChangedArgs } from "TFS/WorkItemTracking/ExtensionContracts";
+import { IWorkItemChangedArgs } from "TFS/WorkItemTracking/ExtensionContracts";
 
 const AsyncFieldChangedPicker = getAsyncLoadedComponent(["scripts/ActionRenderers"], (m: typeof ActionRenderers_Async) => m.FieldChangedPicker, () => <Loading />);
 
 export class FieldChangedTrigger extends BaseTrigger {
     private _workItemType: string;
 
-    public async shouldTrigger(args: IWorkItemFieldChangedArgs): Promise<boolean> {
+    public async shouldTrigger(args: IWorkItemChangedArgs): Promise<boolean> {
         const formService = await getFormService();
         const fieldName = this.getAttribute<string>("fieldName", true);
         const field = await getWorkItemField(fieldName);
@@ -32,14 +32,14 @@ export class FieldChangedTrigger extends BaseTrigger {
         const oldFieldValue: string = await translateToFieldValue(this.getAttribute<string>("oldFieldValue", true) || "", field.type);
         const newFieldValue: string = await translateToFieldValue(this.getAttribute<string>("newFieldValue", true) || "", field.type);
 
-        if (args && args.changedFields && args.changedFields[fieldName]) {
-            const oldValue = await formService.getFieldValue(fieldName);
-            const newValue = await formService.getFieldValue(fieldName);
-
-            return oldValue !== newValue && (isAnyMacro(oldFieldValue) || oldFieldValue === oldValue) && (isAnyMacro(newFieldValue) || newFieldValue === newValue);
-        }
-
-        return false;
+        // For onSaved events, we need to check the current field value against our trigger conditions
+        // since the work item has just been saved and committed
+        const currentValue = await formService.getFieldValue(fieldName);
+        
+        // Check if the current value matches our "newFieldValue" condition
+        // and if we have a specific "oldFieldValue" condition, we can't verify it anymore
+        // since the work item has been saved, so we'll focus on the new value condition
+        return (isAnyMacro(newFieldValue) || newFieldValue === currentValue);
     }
 
     public getFriendlyName(): string {
@@ -47,7 +47,7 @@ export class FieldChangedTrigger extends BaseTrigger {
     }
 
     public getDescription(): string {
-        return "Triggers when a field changes";
+        return "Triggers when a field changes and the work item is saved";
     }
 
     public isDirty(): boolean {
@@ -98,7 +98,10 @@ export class FieldChangedTrigger extends BaseTrigger {
     }
 
     public getAssociatedFormEvent(): FormEvents {
-        return FormEvents.onFieldChanged;
+        // Change from onFieldChanged to onSaved to ensure triggers only fire
+        // after the work item is actually saved and committed, not just when
+        // the field value changes in the UI
+        return FormEvents.onSaved;
     }
 
     public render(workItemType: string): React.ReactNode {

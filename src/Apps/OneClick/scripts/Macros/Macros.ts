@@ -5,6 +5,15 @@ import { getFormService, getWorkItemField } from "Common/Utilities/WorkItemFormH
 import { addDays } from "date-fns";
 import { format } from "date-fns";
 
+// Import DevOps macros
+import { 
+    MacroCurrentIteration, 
+    MacroStartOfDay, 
+    MacroStartOfMonth, 
+    MacroStartOfYear,
+    MacroCurrentSprint 
+} from "./DevOpsMacros";
+
 export abstract class BaseMacro {
     private static registeredMacros: IDictionaryStringTo<new () => BaseMacro> = {};
     private static allowedSeparators = ["=", "-", "+"];
@@ -133,3 +142,10 @@ export class MacroFieldValue extends BaseMacro {
     }
 }
 BaseMacro.registerMacro("@FieldValue", MacroFieldValue);
+
+// Register DevOps macros
+BaseMacro.registerMacro("@CurrentIteration", MacroCurrentIteration);
+BaseMacro.registerMacro("@StartOfDay", MacroStartOfDay);
+BaseMacro.registerMacro("@StartOfMonth", MacroStartOfMonth);
+BaseMacro.registerMacro("@StartOfYear", MacroStartOfYear);
+BaseMacro.registerMacro("@CurrentSprint", MacroCurrentSprint);
