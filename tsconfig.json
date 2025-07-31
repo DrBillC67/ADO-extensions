@@ -32,7 +32,7 @@
             "PRWorkItems/*": ["src/Apps/PRWorkItems/scripts/*"],
             "RelatedWits/*": ["src/Apps/RelatedWits/scripts/*"]
         },
-        "types": ["react", "react-dom", "jquery"]
+        "types": ["react", "react-dom", "jquery", "jest", "node"]
     },
     "typeAcquisition": {
         "enable": true
